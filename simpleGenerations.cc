@@ -19,10 +19,6 @@ inline int roundToInt(double d)
 {
 	return static_cast<int>(round(d));
 }
-<<<<<<< HEAD
-=======
-namespace std {
->>>>>>> 26da4b895d9671d3b3bcd107ab97715703238eca
 
 
 simpleGenerations::simpleGenerations() {
@@ -164,8 +160,4 @@ EasyImage simpleGenerations::generate_ColorRectangle(const ini::Configuration &c
 			}
 		return image;
 }
-<<<<<<< HEAD
 
-=======
-} /* namespace std */
->>>>>>> 26da4b895d9671d3b3bcd107ab97715703238eca

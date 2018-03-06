@@ -10,10 +10,7 @@
 #include "simpleGenerations.h"
 #include "imgUtils.h"
 #include "L2DEngine.h"
-<<<<<<< HEAD
 #include "Engine3D.h"
-=======
->>>>>>> 26da4b895d9671d3b3bcd107ab97715703238eca
 
 #include <fstream>
 #include <iostream>
@@ -32,23 +29,16 @@ inline int roundToInt(double d)
 {
 	return static_cast<int>(round(d));
 }
-<<<<<<< HEAD
 /*
  * this methods reads an .ini file and then calls the correct method to creature the right image
  */
-=======
-
->>>>>>> 26da4b895d9671d3b3bcd107ab97715703238eca
 img::EasyImage generate_image(const ini::Configuration &configuration)
 {
 	const std::string typeString= configuration["General"]["type"].as_string_or_die();
 	simpleGenerations simple;
 	L2DEngine l2dengine;
 	imgUtils utils;
-<<<<<<< HEAD
 	Engine3D engine3D;
-=======
->>>>>>> 26da4b895d9671d3b3bcd107ab97715703238eca
 			if(typeString== "IntroColorRectangle"){
 				return simple.generate_ColorRectangle(configuration);
 			}else if(typeString== "IntroBlocks"){
@@ -65,12 +55,9 @@ img::EasyImage generate_image(const ini::Configuration &configuration)
 			}else if(typeString=="2DLSystem"){
 				Lines2D lines= l2dengine.L2D_ToLines(configuration);
 				return utils.LinesToImg(configuration,lines);
-<<<<<<< HEAD
 			}else if(typeString=="Wireframe"){
 					Lines2D lines= engine3D.draw3D(configuration);
 					return utils.LinesToImg(configuration,lines);
-=======
->>>>>>> 26da4b895d9671d3b3bcd107ab97715703238eca
 			}
 
 	return img::EasyImage();

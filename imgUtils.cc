@@ -79,57 +79,33 @@ EasyImage imgUtils::LinesToImg(const ini::Configuration &configuration,Lines2D& 
 	if(xmin<0||ymin<0){
 		Lines2D nieuwLines;
 		if(xmin<0&&ymin>=0){
-<<<<<<< HEAD
 			for(Line2D& line:lines){
-=======
-			for(Line2D line:lines){
->>>>>>> 26da4b895d9671d3b3bcd107ab97715703238eca
 				double tempx1=line.p1.x-xmin;
 				double tempx2=line.p2.x-xmin;
 				line.setp1(tempx1,line.p1.y);
 				line.setp2(tempx2,line.p2.y);
-<<<<<<< HEAD
-=======
-				nieuwLines.push_back(line);
->>>>>>> 26da4b895d9671d3b3bcd107ab97715703238eca
 				continue;
 						}
 			roundToInt(xmax-=xmin);
 			xmin=0;
 		}else if(ymin<0&&xmin>=0){
-<<<<<<< HEAD
 			for(Line2D& line:lines){
-=======
-			for(Line2D line:lines){
->>>>>>> 26da4b895d9671d3b3bcd107ab97715703238eca
 				double tempy1=line.p1.y-ymin;
 				double tempy2=line.p2.y-ymin;
 				line.setp1(line.p1.x,tempy1);
 				line.setp2(line.p2.x,tempy2);
-<<<<<<< HEAD
-=======
-				nieuwLines.push_back(line);
->>>>>>> 26da4b895d9671d3b3bcd107ab97715703238eca
 				continue;
 			}
 			roundToInt(ymax-=ymin);
 			ymin=0;
 		}else if(ymin<0&&xmin<0){
-<<<<<<< HEAD
 			for(Line2D& line:lines){
-=======
-			for(Line2D line:lines){
->>>>>>> 26da4b895d9671d3b3bcd107ab97715703238eca
 				double tempy1=line.p1.y-ymin;
 				double tempy2=line.p2.y-ymin;
 				double tempx1=line.p1.x-xmin;
 				double tempx2=line.p2.x-xmin;
 				line.setp1(tempx1,tempy1);
 				line.setp2(tempx2,tempy2);
-<<<<<<< HEAD
-=======
-				nieuwLines.push_back(line);
->>>>>>> 26da4b895d9671d3b3bcd107ab97715703238eca
 				continue;
 			}
 			roundToInt(xmax-=xmin);
@@ -137,11 +113,7 @@ EasyImage imgUtils::LinesToImg(const ini::Configuration &configuration,Lines2D& 
 			ymin=0;
 			xmin=0;
 		}
-<<<<<<< HEAD
 
-=======
-		lines=nieuwLines;
->>>>>>> 26da4b895d9671d3b3bcd107ab97715703238eca
 	}
 
 	double imagex;

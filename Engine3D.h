@@ -3,16 +3,12 @@
  *
  *  Created on: Mar 1, 2018
  *      Author: thibaut
-<<<<<<< HEAD
  *  A class to render 3D images
  *  Not yet finished
-=======
->>>>>>> 26da4b895d9671d3b3bcd107ab97715703238eca
  */
 
 #ifndef ENGINE3D_H_
 #define ENGINE3D_H_
-<<<<<<< HEAD
 #include "figure3D.h"
 #include "face3D.h"
 #include "Color.h"
@@ -34,17 +30,5 @@ public:
 	figure3D applyTransformation(figure3D &fig, const Matrix &mat);
 };
 
-=======
-
-namespace img {
-
-class Engine3D {
-public:
-	Engine3D();
-	virtual ~Engine3D();
-};
-
-} /* namespace img */
->>>>>>> 26da4b895d9671d3b3bcd107ab97715703238eca
 
 #endif /* ENGINE3D_H_ */

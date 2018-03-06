@@ -3,10 +3,7 @@
  *
  *  Created on: Mar 1, 2018
  *      Author: thibaut
-<<<<<<< HEAD
  *  A class that represents faces of a 3Dfigure
-=======
->>>>>>> 26da4b895d9671d3b3bcd107ab97715703238eca
  */
 
 #ifndef FACE3D_H_
