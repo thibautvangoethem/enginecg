@@ -14,7 +14,10 @@
 #include "l_parser.h"
 #include "imgUtils.h"
 
+<<<<<<< HEAD
 #include <fstream>
+=======
+>>>>>>> 26da4b895d9671d3b3bcd107ab97715703238eca
 #include <iostream>
 #include <vector>
 #include <cmath>

@@ -8,8 +8,12 @@
 #include "figure3D.h"
 #include "face3D.h"
 #include "Color.h"
+<<<<<<< HEAD
 #include "vector3d.h"
 #include <cmath>
+=======
+
+>>>>>>> 26da4b895d9671d3b3bcd107ab97715703238eca
 void figure3D::addFace(face3D face){ // @suppress("Member declaration not found")
 	faces.push_back(face);
 }
@@ -18,6 +22,7 @@ void figure3D::addPoint(Vector3D v){
 	points.push_back(v);
 }
 
+<<<<<<< HEAD
 void figure3D::scaleFigure(const double scaleFactor){
 	Matrix scaleM;
 	scaleM(1,1)=scaleFactor;
@@ -75,4 +80,6 @@ void figure3D::center(){
 
 }
 
+=======
+>>>>>>> 26da4b895d9671d3b3bcd107ab97715703238eca
 

@@ -3,7 +3,10 @@
  *
  *  Created on: Mar 1, 2018
  *      Author: thibaut
+<<<<<<< HEAD
  *
+=======
+>>>>>>> 26da4b895d9671d3b3bcd107ab97715703238eca
  */
 #include "face3D.h"
 

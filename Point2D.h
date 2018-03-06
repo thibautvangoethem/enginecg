@@ -3,7 +3,10 @@
  *
  *  Created on: Feb 20, 2018
  *      Author: thibaut
+<<<<<<< HEAD
  *  A class that represents a point in a 2D image
+=======
+>>>>>>> 26da4b895d9671d3b3bcd107ab97715703238eca
  */
 
 #ifndef POINT2D_H_
