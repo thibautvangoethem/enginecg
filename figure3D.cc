@@ -10,6 +10,7 @@
 #include "Color.h"
 #include "vector3d.h"
 #include <cmath>
+#include <iostream>
 void figure3D::addFace(face3D face){ // @suppress("Member declaration not found")
 	faces.push_back(face);
 }
@@ -66,8 +67,8 @@ void figure3D::translate(const Vector3D vec){
 	translate(4,1)=vec.x;
 	translate(4,2)=vec.y;
 	translate(4,3)=vec.z;
-	for(Vector3D& vec:points){
-			vec=vec*translate;
+	for(Vector3D& point:points){
+			point=point*translate;
 		}
 }
 
