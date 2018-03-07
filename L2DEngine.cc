@@ -39,6 +39,7 @@ L2DEngine::~L2DEngine() {
 Lines2D L2DEngine::L2D_ToLines(const ini::Configuration &configuration){
 	std::string toRead=configuration["2DLSystem"]["inputfile"].as_string_or_die();
 	LParser::LSystem2D l_system;
+	std::cout<<"reading: "<< toRead << std::endl;
 	std::ifstream input_stream(toRead);
     input_stream >> l_system;
     input_stream.close();

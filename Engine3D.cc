@@ -29,11 +29,31 @@ Lines2D Engine3D::draw3D(const ini::Configuration &configuration){
 	std::vector<figure3D> figures;
 	int nrfigures=configuration["general"]["nrFigures"].as_int_or_die();
 	for(int figcount=0;figcount<nrfigures;figcount++){
-			int nrfigures=configuration["Figure"+figcount][""].as_int_or_die();
+			std::string figureType=configuration["Figure"+figcount]["type"].as_string_or_die();
+			figure3D newfig=Engine3D::LineDrawing(configuration,figcount);
+			int rotatex=configuration["Figure"+figcount]["rotateX"].as_int_or_die();
+			int rotatey=configuration["Figure"+figcount]["rotateY"].as_int_or_die();
+			int rotatez=configuration["Figure"+figcount]["rotateZ"].as_int_or_die();
+			double scale=configuration["Figure"+figcount]["scale"].as_double_or_die();
+			std::vector<int> center=configuration["Figure"+figcount]["center"].as_int_tuple_or_die();
+			if(scale!=1){
+				newfig.scaleFigure(scale);
+			}
+			if(rotatex!=0){
+				newfig.rotateX(rotatex/180*M_PI);
+			}
+			if(rotatey!=0){
+				newfig.rotateY(rotatex/180*M_PI);
+			}
+			if(rotatez!=0){
+				newfig.rotateZ(rotatex/180*M_PI);
+			}
+
 		}
+
 }
 
-figure3D Engine3D::LineDrawing(const ini::Configuration &configuration){
+figure3D Engine3D::LineDrawing(const ini::Configuration &configuration,int figcount){
 
 }
 

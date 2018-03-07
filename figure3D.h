@@ -28,8 +28,8 @@ public:
 	virtual ~figure3D(){};
 	void scaleFigure(const double scaleFactor);
 	void rotateX(const double angle);
-	void rotatey(const double angle);
-	void rotatez(const double angle);
+	void rotateY(const double angle);
+	void rotateZ(const double angle);
 	void translate(const Vector3D vec);
 	void center();
 

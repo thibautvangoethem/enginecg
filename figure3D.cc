@@ -39,7 +39,7 @@ void figure3D::rotateX(const double angle){
 		}
 }
 
-void figure3D::rotatey(const double angle){
+void figure3D::rotateY(const double angle){
 	Matrix roty;
 	roty(1,1)=cos(angle);
 	roty(1,3)=-sin(angle);
@@ -50,7 +50,7 @@ void figure3D::rotatey(const double angle){
 		}
 }
 
-void figure3D::rotatez(const double angle){
+void figure3D::rotateZ(const double angle){
 	Matrix roty;
 	roty(1,1)=cos(angle);
 	roty(2,1)=-sin(angle);

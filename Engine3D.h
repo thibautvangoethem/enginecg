@@ -26,7 +26,7 @@ public:
 	Engine3D(){};
 	virtual ~Engine3D();
 	Lines2D draw3D(const ini::Configuration &configuration);
-	figure3D LineDrawing(const ini::Configuration &configuration);
+	figure3D LineDrawing(const ini::Configuration &configuration,int figcount);
 	figure3D applyTransformation(figure3D &fig, const Matrix &mat);
 };
 
