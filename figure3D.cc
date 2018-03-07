@@ -71,8 +71,4 @@ void figure3D::translate(const Vector3D vec){
 		}
 }
 
-void figure3D::center(){
-
-}
-
 

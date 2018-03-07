@@ -24,16 +24,14 @@ public:
 	std::vector<Vector3D> points;
 	std::vector<face3D> faces;
 	figColor::Color color;
-	void addPoint(Vector3D v);
 	virtual ~figure3D(){};
 	void scaleFigure(const double scaleFactor);
 	void rotateX(const double angle);
 	void rotateY(const double angle);
 	void rotateZ(const double angle);
 	void translate(const Vector3D vec);
-	void center();
-
 	void addFace(face3D face);
+	void addPoint(Vector3D v);
 };
 
 
