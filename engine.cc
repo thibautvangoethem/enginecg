@@ -22,13 +22,7 @@
 #include <utility>
 
 using namespace std;
-
-
 typedef std::list<Line2D> Lines2D;
-inline int roundToInt(double d)
-{
-	return static_cast<int>(round(d));
-}
 /*
  * this methods reads an .ini file and then calls the correct method to creature the right image
  */
@@ -54,10 +48,11 @@ img::EasyImage generate_image(const ini::Configuration &configuration)
 				}
 			}else if(typeString=="2DLSystem"){
 				Lines2D lines= l2dengine.L2D_ToLines(configuration);
-				return utils.LinesToImg(configuration,lines);
+				return imgUtils::LinesToImg(configuration,lines);
 			}else if(typeString=="Wireframe"){
-					Lines2D lines= engine3D.draw3D(configuration);
-					return utils.LinesToImg(configuration,lines);
+					std::vector<figure3D> figures= engine3D.draw3D(configuration);
+					Lines2D lines=imgUtils::figuresToLines2D(configuration,figures);
+					return imgUtils::LinesToImg(configuration,lines);
 			}
 
 	return img::EasyImage();

@@ -30,7 +30,6 @@ inline int roundToInt(double d)
 {
 	return static_cast<int>(round(d));
 }
-namespace std {
 
 imgUtils::imgUtils() {
 	// TODO Auto-generated constructor stub
@@ -41,7 +40,6 @@ imgUtils::~imgUtils() {
 	// TODO Auto-generated destructor stub
 }
 
- /* namespace img */
 EasyImage imgUtils::LinesToImg(const ini::Configuration &configuration,Lines2D& lines){
 	std::vector<double> achtergrond=configuration["General"]["backgroundcolor"].as_double_tuple_or_die();
 	std::cout<<"start scaling lines"<<std::endl;
@@ -141,8 +139,11 @@ EasyImage imgUtils::LinesToImg(const ini::Configuration &configuration,Lines2D& 
 	double ymiddle=scale*(ymin+ymax)/2;
 	double dx= (imagex/2)-xmiddle;
 	double dy=(imagey/2)-ymiddle;
+//	std::cout<<imagex<<" "<<imagey<<std::endl;
 	std::cout<<"converting lines to the image"<<std::endl;
 	for(Line2D i:lines){
+//		std::cout <<i.p1.x<<" "<<i.p1.y<<std::endl;
+//		std::cout <<i.p2.x<<" "<<i.p2.y<<std::endl;
 		int x1=roundToInt((i.getp1().x*scale)+dx);
 		int y1=roundToInt((i.getp1().y*scale)+dy);
 		int x2=roundToInt((i.getp2().x*scale)+dx);
@@ -156,4 +157,41 @@ EasyImage imgUtils::LinesToImg(const ini::Configuration &configuration,Lines2D& 
 	return image;
 
 }
+
+
+Lines2D imgUtils::figuresToLines2D(const ini::Configuration &configuration, std::vector<figure3D> &figures){
+	std::cout<<"begin converting figures to lines"<<std::endl;
+	Lines2D lines;
+	for(figure3D fig:figures){
+		std::vector<Point2D> projectedPoints;
+		for(Vector3D vec:fig.points){
+			projectedPoints.push_back(imgUtils::projectPoint(vec,1));
+		}
+		for(face3D face:fig.faces){
+			for(int i=0;i<face.pointsIndex.size();i++){
+				if(i==face.pointsIndex.size()-1){
+					lines.push_back(Line2D(projectedPoints[face.pointsIndex[i]],projectedPoints[face.pointsIndex[0]],fig.color));
+				}else{
+					lines.push_back(Line2D(projectedPoints[face.pointsIndex[i]],projectedPoints[face.pointsIndex[i+1]],fig.color));
+				}
+			}
+		}
+	}
+	return lines;
 }
+
+
+Point2D imgUtils::projectPoint(const Vector3D &point,const double d){
+	double x;
+	double y;
+	if(point.z==0){
+		x= d*point.x/-1;
+		y= d*point.y/-1;
+	}else{
+		x= d*point.x/-point.z;
+		y= d*point.y/-point.z;
+	}
+	return Point2D(x,y);
+
+}
+

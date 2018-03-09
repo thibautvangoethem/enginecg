@@ -25,9 +25,12 @@ class Engine3D {
 public:
 	Engine3D(){};
 	virtual ~Engine3D();
-	Lines2D draw3D(const ini::Configuration &configuration);
+	std::vector<figure3D> draw3D(const ini::Configuration &configuration);
 	figure3D LineDrawing(const ini::Configuration &configuration,int figcount);
-	void applyTransformation(figure3D &fig, const Matrix &mat);
+	static void applyTransformation(figure3D &fig, const Matrix &mat);
+	static void applyAllTransformation(std::vector<figure3D> &figs, const Matrix &mat);
+	Matrix eyePointTrans(const Vector3D &eyepoint);
+	double toRadian(double angle);
 };
 
 

@@ -8,6 +8,7 @@
 #include "easy_image.h"
 #include "Color.h"
 #include "Line2D.h"
+#include "figure3D.h"
 
 #include <list>
 
@@ -15,15 +16,13 @@ using namespace img;
 #ifndef IMGUTILS_H_
 #define IMGUTILS_H_
 typedef std::list<Line2D> Lines2D;
-namespace std {
 
 class imgUtils {
 public:
 	imgUtils();
 	virtual ~imgUtils();
-	EasyImage LinesToImg(const ini::Configuration &configuration,Lines2D& lines);	// converts a list of line2D's into an image
+	static EasyImage LinesToImg(const ini::Configuration &configuration,Lines2D& lines);	// converts a list of line2D's into an images
+	static Lines2D figuresToLines2D(const ini::Configuration &configuration, std::vector<figure3D> &figures);
+	static Point2D projectPoint(const Vector3D &point,const double d);
 };
-
-} /* namespace img */
-
 #endif /* IMGUTILS_H_ */
