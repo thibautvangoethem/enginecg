@@ -22,6 +22,10 @@
 #include "Line2D.h"
 
 typedef std::list<Line2D> Lines2D;
+inline int roundToInt(double d)
+{
+	return static_cast<int>(round(d));
+}
 
 Engine3D::~Engine3D() {
 	// TODO Auto-generated destructor stub
@@ -46,13 +50,13 @@ std::vector<figure3D> Engine3D::draw3D(const ini::Configuration &configuration){
 				newfig.scaleFigure(scale);
 			}
 			if(rotatex!=0){
-				newfig.rotateX(rotatex/180*M_PI);
+				newfig.rotateX(rotatex);
 			}
 			if(rotatey!=0){
-				newfig.rotateY(rotatex/180*M_PI);
+				newfig.rotateY(rotatey);
 			}
 			if(rotatez!=0){
-				newfig.rotateZ(rotatex/180*M_PI);
+				newfig.rotateZ(rotatez);
 			}
 			Vector3D transVector=Vector3D::vector(center[0],center[1],center[2]);
 			newfig.translate(transVector);
@@ -92,7 +96,7 @@ void Engine3D::applyTransformation(figure3D &fig, const Matrix &mat){
 }
 
 void Engine3D::applyAllTransformation(std::vector<figure3D> &figs, const Matrix &mat){
-	for(figure3D fig:figs){
+	for(figure3D &fig:figs){
 		Engine3D::applyTransformation(fig ,mat );
 	}
 }
@@ -109,7 +113,7 @@ Matrix Engine3D::eyePointTrans(const Vector3D &eyepoint){
 	eyePointMatrix(1,1)=-sin(theta);
 	eyePointMatrix(2,1)=cos(theta);
 	eyePointMatrix(1,2)=-cos(theta)*cos(phi);
-	eyePointMatrix(2,2)=-sin(theta)/cos(phi);
+	eyePointMatrix(2,2)=-sin(theta)*cos(phi);
 	eyePointMatrix(3,2)=sin(phi);
 	eyePointMatrix(1,3)=cos(theta)*sin(phi);
 	eyePointMatrix(2,3)=sin(theta)*sin(phi);

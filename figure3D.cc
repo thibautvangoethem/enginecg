@@ -19,7 +19,7 @@ void figure3D::addPoint(Vector3D v){
 	points.push_back(v);
 }
 
-void figure3D::scaleFigure(const double scaleFactor){
+void figure3D::scaleFigure(double scaleFactor){
 	Matrix scaleM;
 	scaleM(1,1)=scaleFactor;
 	scaleM(2,2)=scaleFactor;
@@ -29,23 +29,25 @@ void figure3D::scaleFigure(const double scaleFactor){
 	}
 }
 
-void figure3D::rotateX(const double angle){
+void figure3D::rotateX(double angle){
 	Matrix rotx;
-	rotx(2,2)=cos(angle);
-	rotx(2,3)=sin(angle);
-	rotx(3,2)=-sin(angle);
-	rotx(3,3)=cos(angle);
+	double radAngle =figure3D::toRadian(angle);
+	rotx(2,2)=cos(radAngle);
+	rotx(2,3)=sin(radAngle);
+	rotx(3,2)=-sin(radAngle);
+	rotx(3,3)=cos(radAngle);
 	for(Vector3D& vec:points){
 			vec=vec*rotx;
 		}
 }
 
-void figure3D::rotateY(const double angle){
+void figure3D::rotateY(double angle){
 	Matrix roty;
-	roty(1,1)=cos(angle);
-	roty(1,3)=-sin(angle);
-	roty(3,1)=sin(angle);
-	roty(3,3)=cos(angle);
+	double radAngle =figure3D::toRadian(angle);
+	roty(1,1)=cos(radAngle);
+	roty(1,3)=-sin(radAngle);
+	roty(3,1)=sin(radAngle);
+	roty(3,3)=cos(radAngle);
 	for(Vector3D& vec:points){
 			vec=vec*roty;
 		}
@@ -53,10 +55,11 @@ void figure3D::rotateY(const double angle){
 
 void figure3D::rotateZ(const double angle){
 	Matrix roty;
-	roty(1,1)=cos(angle);
-	roty(2,1)=-sin(angle);
-	roty(1,2)=sin(angle);
-	roty(2,2)=cos(angle);
+	double radAngle =figure3D::toRadian(angle);
+	roty(1,1)=cos(radAngle);
+	roty(2,1)=-sin(radAngle);
+	roty(1,2)=sin(radAngle);
+	roty(2,2)=cos(radAngle);
 	for(Vector3D& vec:points){
 			vec=vec*roty;
 		}
@@ -72,4 +75,7 @@ void figure3D::translate(const Vector3D vec){
 		}
 }
 
+double figure3D::toRadian(double angle){
+	return angle/180*M_PI;
+}
 

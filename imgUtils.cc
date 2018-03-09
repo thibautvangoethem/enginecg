@@ -118,11 +118,11 @@ EasyImage imgUtils::LinesToImg(const ini::Configuration &configuration,Lines2D& 
 	double imagey;
 	int size=configuration["General"]["size"].as_int_or_die();
 	if(xmax>ymax){
-		imagex=size*((xmax-xmin)/xmax);
-		imagey=size*((ymax-ymin)/xmax);
+		imagex=roundToInt(size*((xmax-xmin)/xmax));
+		imagey=roundToInt(size*((ymax-ymin)/xmax));
 	}else{
-		imagex=size*((xmax-xmin)/ymax);
-		imagey=size*((ymax-ymin)/ymax);
+		imagex=roundToInt(size*((xmax-xmin)/ymax));
+		imagey=roundToInt(size*((ymax-ymin)/ymax));
 	}
 	img::EasyImage image(roundToInt(imagex),roundToInt(imagey));
 	for(unsigned int i = 1; i < imagex-1; i++)
@@ -177,6 +177,7 @@ Lines2D imgUtils::figuresToLines2D(const ini::Configuration &configuration, std:
 			}
 		}
 	}
+
 	return lines;
 }
 

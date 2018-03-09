@@ -31,7 +31,6 @@ img::EasyImage generate_image(const ini::Configuration &configuration)
 	const std::string typeString= configuration["General"]["type"].as_string_or_die();
 	simpleGenerations simple;
 	L2DEngine l2dengine;
-	imgUtils utils;
 	Engine3D engine3D;
 			if(typeString== "IntroColorRectangle"){
 				return simple.generate_ColorRectangle(configuration);
