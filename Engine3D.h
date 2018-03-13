@@ -27,6 +27,12 @@ public:
 	virtual ~Engine3D();
 	std::vector<figure3D> draw3D(const ini::Configuration &configuration);
 	figure3D LineDrawing(const ini::Configuration &configuration,int figcount);
+	figure3D DrawCube(const ini::Configuration &configuration,int figcount);
+	figure3D DrawTetrahedron(const ini::Configuration &configuration,int figcount);
+	figure3D DrawOctahedron(const ini::Configuration &configuration,int figcount);
+	figure3D DrawIcosahedron(const ini::Configuration &configuration,int figcount);
+	figure3D DrawDodecahedron(const ini::Configuration &configuration,int figcount);
+	figure3D createSphere(const double radius, const int n);
 	static void applyTransformation(figure3D &fig, const Matrix &mat);
 	static void applyAllTransformation(std::vector<figure3D> &figs, const Matrix &mat);
 	Matrix eyePointTrans(const Vector3D &eyepoint);
