@@ -53,7 +53,12 @@ std::vector<figure3D> Engine3D::draw3D(const ini::Configuration &configuration){
 				newfig=Engine3D::DrawOctahedron(configuration,figcount);
 			}else if(configuration[figure]["type"].as_string_or_die()=="Dodecahedron"){
 				newfig=Engine3D::DrawDodecahedron(configuration,figcount);
-
+			}else if(configuration[figure]["type"].as_string_or_die()=="Sphere"){
+				newfig=Engine3D::DrawSphere(configuration,figcount);
+			}else if(configuration[figure]["type"].as_string_or_die()=="Cone"){
+				newfig=Engine3D::DrawCone(configuration,figcount);
+			}else if(configuration[figure]["type"].as_string_or_die()=="Cylinder"){
+				newfig=Engine3D::DrawCylinder(configuration,figcount);
 			}
 			int rotatex=configuration[figure]["rotateX"].as_int_or_die();
 			int rotatey=configuration[figure]["rotateY"].as_int_or_die();
@@ -278,6 +283,104 @@ figure3D Engine3D::DrawDodecahedron(const ini::Configuration &configuration,int 
 	newfig.addFace(face3D(v));
 	return newfig;
 }
+
+figure3D Engine3D::DrawSphere(const ini::Configuration &configuration,const int figcount){
+	std::string figure="Figure"+std::to_string(figcount);
+	std::vector<double> kleur=configuration[figure]["color"].as_double_tuple_or_die();
+	int n=configuration[figure]["n"].as_int_or_die();
+	figure3D oldfig=Engine3D::DrawIcosahedron(configuration,figcount);
+	for(int i=0;i<n;i++){
+		std::vector<Vector3D> nieuwpoints;
+		std::vector<face3D> nieuwface;
+		std::vector<Vector3D> oldpoints=oldfig.points;
+		int pointcounter=0;
+		for(face3D temp:oldfig.faces){
+			Vector3D A=oldpoints[temp.pointsIndex[0]];
+			Vector3D B=oldpoints[temp.pointsIndex[1]];
+			Vector3D C=oldpoints[temp.pointsIndex[2]];
+			Vector3D D=(A+B)/2;
+			Vector3D E=(A+C)/2;
+			Vector3D F=(B+C)/2;
+			nieuwpoints.push_back(A);
+			nieuwpoints.push_back(B);
+			nieuwpoints.push_back(C);
+			nieuwpoints.push_back(D);
+			nieuwpoints.push_back(E);
+			nieuwpoints.push_back(F);
+			std::vector<int> vec={pointcounter,pointcounter+3,pointcounter+4};
+			nieuwface.push_back(face3D(vec));
+			vec={pointcounter+1,pointcounter+5,pointcounter+3};
+			nieuwface.push_back(face3D(vec));
+			vec={pointcounter+2,pointcounter+4,pointcounter+5};
+			nieuwface.push_back(face3D(vec));
+			vec={pointcounter+3,pointcounter+5,pointcounter+4};
+			nieuwface.push_back(face3D(vec));
+			pointcounter+=6;
+		}
+		figure3D newfig(nieuwface,figColor::Color(roundToInt(255*kleur[0]),roundToInt(255*kleur[1]),roundToInt(255*kleur[2])));
+		for(auto p:nieuwpoints){
+			newfig.addPoint(p);
+		}
+		oldfig=newfig;
+	}
+	for(Vector3D& point:oldfig.points){
+//		std::cout<<point.x<<std::endl;
+		point.normalise();
+	}
+	return oldfig;
+}
+
+figure3D Engine3D::DrawCone(const ini::Configuration &configuration, const int figcount){
+	std::string figure="Figure"+std::to_string(figcount);
+	std::vector<double> kleur=configuration[figure]["color"].as_double_tuple_or_die();
+	figure3D newfig=figure3D(figColor::Color(roundToInt(255*kleur[0]),roundToInt(255*kleur[1]),roundToInt(255*kleur[2])));
+	int n=configuration[figure]["n"].as_int_or_die();
+	double height=configuration[figure]["height"].as_double_or_die();
+	for(int i=1;i<n+1;i++){
+		double x=cos(2*i*M_PI/n);
+		double y=sin(2*i*M_PI/n);
+		newfig.addPoint(Vector3D::point(x,y,0));
+	}
+	newfig.addPoint(Vector3D::point(0,0,height));
+	face3D megaface;
+	for(int i=0;i<n;i++){
+		std::vector<int> tempvec={i,(i+1)%n,n};
+		newfig.addFace(face3D(tempvec));
+		megaface.addPoint((n-i)-1);
+	}
+	newfig.addFace(megaface);
+	return newfig;
+}
+
+figure3D Engine3D::DrawCylinder(const ini::Configuration &configuration, const int figcount){
+	std::string figure="Figure"+std::to_string(figcount);
+	std::vector<double> kleur=configuration[figure]["color"].as_double_tuple_or_die();
+	figure3D newfig=figure3D(figColor::Color(roundToInt(255*kleur[0]),roundToInt(255*kleur[1]),roundToInt(255*kleur[2])));
+	int n=configuration[figure]["n"].as_int_or_die();
+	double height=configuration[figure]["height"].as_double_or_die();
+	for(int i=1;i<n+1;i++){
+		double x=cos(2*i*M_PI/n);
+		double y=sin(2*i*M_PI/n);
+		newfig.addPoint(Vector3D::point(x,y,0));
+	}
+	for(int i=1;i<n+1;i++){
+		double x=cos(2*i*M_PI/n);
+		double y=sin(2*i*M_PI/n);
+		newfig.addPoint(Vector3D::point(x,y,height));
+	}
+	face3D megafaceTop;
+	face3D megafaceBottom;
+	for(int i=0;i<n;i++){
+		std::vector<int> tempvec={i,(i+1)%n,(n+(i+1)%n),n+i};
+		newfig.addFace(face3D(tempvec));
+		megafaceTop.addPoint(n+i);
+		megafaceBottom.addPoint(i);
+	}
+	newfig.addFace(megafaceBottom);
+	newfig.addFace(megafaceTop);
+	return newfig;
+}
+
 void Engine3D::applyTransformation(figure3D &fig, const Matrix &mat){
 	for(Vector3D& point:fig.points){
 		point=point*mat;

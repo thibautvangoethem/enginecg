@@ -32,7 +32,9 @@ public:
 	figure3D DrawOctahedron(const ini::Configuration &configuration,int figcount);
 	figure3D DrawIcosahedron(const ini::Configuration &configuration,int figcount);
 	figure3D DrawDodecahedron(const ini::Configuration &configuration,int figcount);
-	figure3D createSphere(const double radius, const int n);
+	figure3D DrawSphere(const ini::Configuration &configuration, const int figcount);
+	figure3D DrawCone(const ini::Configuration &configuration, const int figcount);
+	figure3D DrawCylinder(const ini::Configuration &configuration, const int figcount);
 	static void applyTransformation(figure3D &fig, const Matrix &mat);
 	static void applyAllTransformation(std::vector<figure3D> &figs, const Matrix &mat);
 	Matrix eyePointTrans(const Vector3D &eyepoint);
