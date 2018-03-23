@@ -21,6 +21,7 @@
 #include <math.h>
 #include <vector>
 #include "Line2D.h"
+#include "L3DEngine.h"
 
 typedef std::list<Line2D> Lines2D;
 inline int roundToInt(double d)
@@ -59,10 +60,14 @@ std::vector<figure3D> Engine3D::draw3D(const ini::Configuration &configuration){
 				newfig=Engine3D::DrawCone(configuration,figcount);
 			}else if(configuration[figure]["type"].as_string_or_die()=="Cylinder"){
 				newfig=Engine3D::DrawCylinder(configuration,figcount);
+			}else if(configuration[figure]["type"].as_string_or_die()=="Torus"){
+				newfig=Engine3D::DrawTorus(configuration,figcount);
+			}else if(configuration[figure]["type"].as_string_or_die()=="3DLSystem"){
+				newfig=L3DEngine::L3D_ToFigure(configuration,figcount);
 			}
-			int rotatex=configuration[figure]["rotateX"].as_int_or_die();
-			int rotatey=configuration[figure]["rotateY"].as_int_or_die();
-			int rotatez=configuration[figure]["rotateZ"].as_int_or_die();
+			int rotatex=configuration[figure]["rotateX"].as_double_or_die();
+			int rotatey=configuration[figure]["rotateY"].as_double_or_die();
+			int rotatez=configuration[figure]["rotateZ"].as_double_or_die();
 			double scale=configuration[figure]["scale"].as_double_or_die();
 			std::vector<double> center=configuration[figure]["center"].as_double_tuple_or_die();
 
@@ -381,6 +386,38 @@ figure3D Engine3D::DrawCylinder(const ini::Configuration &configuration, const i
 	return newfig;
 }
 
+figure3D Engine3D::DrawTorus(const ini::Configuration &configuration, const int figcount){
+	std::string figure="Figure"+std::to_string(figcount);
+	std::vector<double> kleur=configuration[figure]["color"].as_double_tuple_or_die();
+	figure3D newfig=figure3D(figColor::Color(roundToInt(255*kleur[0]),roundToInt(255*kleur[1]),roundToInt(255*kleur[2])));
+	double r=configuration[figure]["r"].as_double_or_die();
+	double R=configuration[figure]["R"].as_double_or_die();
+	int m=configuration[figure]["m"].as_int_or_die();
+	int n=configuration[figure]["n"].as_int_or_die();
+	for(int i=1;i<n+1;i++){
+		for(int j=1;j<m+1;j++){
+			double u=2*i*M_PI/n;
+			double v=2*j*M_PI/m;
+			double x=(R+r*cos(v))*cos(u);
+			double y=(R+r*cos(v))*sin(u);
+			double z=r*(sin(v));
+			newfig.addPoint(Vector3D::point(x,y,z));
+		}
+	}
+	for(int i=0;i<n;i++){
+			for(int j=0;j<m;j++){
+				std::vector<int> points;
+				points.push_back(((i*n)+j)%newfig.points.size());
+				points.push_back((((i+1%n)*n)+j)%newfig.points.size());
+				points.push_back((((i+1%n)*n)+((j+1)%m))%newfig.points.size());
+				points.push_back((i*n+((j+1)%m))%newfig.points.size());
+				newfig.addFace(face3D(points));
+			}
+		}
+
+	return newfig;
+}
+
 void Engine3D::applyTransformation(figure3D &fig, const Matrix &mat){
 	for(Vector3D& point:fig.points){
 		point=point*mat;
@@ -398,7 +435,7 @@ double Engine3D::toRadian(double angle){
 }
 
 Matrix Engine3D::eyePointTrans(const Vector3D &eyepoint){
-	double r=pow(pow(eyepoint.x,2)+pow(eyepoint.y,2)+pow(eyepoint.z,2),0.5);
+	double r=sqrt(pow(eyepoint.x,2)+pow(eyepoint.y,2)+pow(eyepoint.z,2));
 	double theta=std::atan2(eyepoint.y,eyepoint.x);
 	double phi=std::acos(eyepoint.z/r);
 	Matrix eyePointMatrix;

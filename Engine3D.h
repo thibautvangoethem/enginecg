@@ -35,6 +35,7 @@ public:
 	figure3D DrawSphere(const ini::Configuration &configuration, const int figcount);
 	figure3D DrawCone(const ini::Configuration &configuration, const int figcount);
 	figure3D DrawCylinder(const ini::Configuration &configuration, const int figcount);
+	figure3D DrawTorus(const ini::Configuration &configuration, const int figcount);
 	static void applyTransformation(figure3D &fig, const Matrix &mat);
 	static void applyAllTransformation(std::vector<figure3D> &figs, const Matrix &mat);
 	Matrix eyePointTrans(const Vector3D &eyepoint);

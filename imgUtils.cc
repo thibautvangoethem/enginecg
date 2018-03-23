@@ -23,6 +23,7 @@
 #include <cmath>
 #include <list>
 #include <utility>
+#include <limits>
 #include "imgUtils.h"
 using namespace img;
 typedef std::list<Line2D> Lines2D;
@@ -43,10 +44,10 @@ imgUtils::~imgUtils() {
 EasyImage imgUtils::LinesToImg(const ini::Configuration &configuration,Lines2D& lines){
 	std::vector<double> achtergrond=configuration["General"]["backgroundcolor"].as_double_tuple_or_die();
 	std::cout<<"start scaling lines"<<std::endl;
-	double xmax=-999999999;
-	double xmin=999999999;
-	double ymax=-99999999;
-	double ymin=99999999;
+	double xmax=std::numeric_limits<double>::min();
+	double xmin=std::numeric_limits<double>::max();
+	double ymax=std::numeric_limits<double>::min();
+	double ymin=std::numeric_limits<double>::max();
 	for(Line2D i:lines){
 		if(i.p1.x>xmax){
 			xmax=i.p1.x;
@@ -84,7 +85,7 @@ EasyImage imgUtils::LinesToImg(const ini::Configuration &configuration,Lines2D& 
 				line.setp2(tempx2,line.p2.y);
 				continue;
 						}
-			roundToInt(xmax-=xmin);
+			xmax-=xmin;
 			xmin=0;
 		}else if(ymin<0&&xmin>=0){
 			for(Line2D& line:lines){
@@ -94,7 +95,7 @@ EasyImage imgUtils::LinesToImg(const ini::Configuration &configuration,Lines2D& 
 				line.setp2(line.p2.x,tempy2);
 				continue;
 			}
-			roundToInt(ymax-=ymin);
+			ymax-=ymin;
 			ymin=0;
 		}else if(ymin<0&&xmin<0){
 			for(Line2D& line:lines){
@@ -106,8 +107,8 @@ EasyImage imgUtils::LinesToImg(const ini::Configuration &configuration,Lines2D& 
 				line.setp2(tempx2,tempy2);
 				continue;
 			}
-			roundToInt(xmax-=xmin);
-			roundToInt(ymax-=ymin);
+			xmax-=xmin;
+			ymax-=ymin;
 			ymin=0;
 			xmin=0;
 		}
@@ -118,36 +119,30 @@ EasyImage imgUtils::LinesToImg(const ini::Configuration &configuration,Lines2D& 
 	double imagey;
 	int size=configuration["General"]["size"].as_int_or_die();
 	if(xmax>ymax){
-		imagex=roundToInt(size*((xmax-xmin)/xmax));
-		imagey=roundToInt(size*((ymax-ymin)/xmax));
+		imagex=size*((xmax-xmin)/xmax);
+		imagey=size*((ymax-ymin)/xmax);
 	}else{
-		imagex=roundToInt(size*((xmax-xmin)/ymax));
-		imagey=roundToInt(size*((ymax-ymin)/ymax));
+		imagex=size*((xmax-xmin)/ymax);
+		imagey=size*((ymax-ymin)/ymax);
 	}
-	img::EasyImage image(roundToInt(imagex),roundToInt(imagey));
-	for(unsigned int i = 1; i < imagex-1; i++)
-						{
-						for(unsigned int j = 1; j < imagey-1; j++)
-							{
-							image(i,j).red = roundToInt(achtergrond[0]*255);
-							image(i,j).green = roundToInt(achtergrond[1]*255);
-							image(i,j).blue = roundToInt(achtergrond[2]*255);
-							}
-						}
+	img::EasyImage image(roundToInt(imagex),roundToInt(imagey),Color(roundToInt(achtergrond[0]*255),roundToInt(achtergrond[1]*255),roundToInt(achtergrond[2]*255)));
 	double scale=0.95*(imagex/xmax-xmin);
 	double xmiddle=scale*(xmin+xmax)/2;
 	double ymiddle=scale*(ymin+ymax)/2;
 	double dx= (imagex/2)-xmiddle;
 	double dy=(imagey/2)-ymiddle;
-//	std::cout<<imagex<<" "<<imagey<<std::endl;
 	std::cout<<"converting lines to the image"<<std::endl;
+	for(Line2D &i:lines){
+		i.p1.x*=scale;
+		i.p1.y*=scale;
+		i.p2.x*=scale;
+		i.p2.y*=scale;
+	}
 	for(Line2D i:lines){
-//		std::cout <<i.p1.x<<" "<<i.p1.y<<std::endl;
-//		std::cout <<i.p2.x<<" "<<i.p2.y<<std::endl;
-		int x1=roundToInt((i.getp1().x*scale)+dx);
-		int y1=roundToInt((i.getp1().y*scale)+dy);
-		int x2=roundToInt((i.getp2().x*scale)+dx);
-		int y2=roundToInt((i.getp2().y*scale)+dy);
+		int x1=roundToInt((i.getp1().x)+dx);
+		int y1=roundToInt((i.getp1().y)+dy);
+		int x2=roundToInt((i.getp2().x)+dx);
+		int y2=roundToInt((i.getp2().y)+dy);
 		i.setp1(x1,y1);
 		i.setp2(x2,y2);
 		image.draw_line(x1,y1,x2,y2,img::Color(i.color.red,i.color.green,i.color.blue));
@@ -168,7 +163,7 @@ Lines2D imgUtils::figuresToLines2D(const ini::Configuration &configuration, std:
 			projectedPoints.push_back(imgUtils::projectPoint(vec,1));
 		}
 		for(face3D face:fig.faces){
-			for(int i=0;i<face.pointsIndex.size();i++){
+			for(unsigned int i=0;i<face.pointsIndex.size();i++){
 				if(i==face.pointsIndex.size()-1){
 					lines.push_back(Line2D(projectedPoints[face.pointsIndex[i]],projectedPoints[face.pointsIndex[0]],fig.color));
 				}else{

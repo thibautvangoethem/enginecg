@@ -68,6 +68,7 @@ int main(int argc, char const* argv[])
                         try
                         {
                                 std::ifstream fin(argv[i]);
+                                std::cout<<argv[i]<<std::endl;
                                 fin >> conf;
                                 fin.close();
                         }
