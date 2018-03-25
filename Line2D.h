@@ -15,10 +15,13 @@ class Line2D {
 public:
 
 	Line2D(Point2D een,Point2D twee,figColor::Color kleur):p1(een), p2(twee), color(kleur){}
+	Line2D(Point2D een,Point2D twee,figColor::Color kleur,double Z1,double Z2):p1(een), p2(twee), color(kleur), z1(Z1), z2(Z2){}
 	virtual ~Line2D(){}
 	Point2D p1;
 	Point2D p2;
 	figColor::Color color;
+	double z1;
+	double z2;
 	const Point2D getp1();
 	const Point2D getp2();
 	void setp1(double x, double y);

@@ -9,6 +9,7 @@
 #include "Color.h"
 #include "Line2D.h"
 #include "figure3D.h"
+#include "ZBuffer.h"
 
 #include <list>
 
@@ -21,8 +22,11 @@ class imgUtils {
 public:
 	imgUtils();
 	virtual ~imgUtils();
-	static EasyImage LinesToImg(const ini::Configuration &configuration,Lines2D& lines);	// converts a list of line2D's into an images
-	static Lines2D figuresToLines2D(const ini::Configuration &configuration, std::vector<figure3D> &figures);
+	static EasyImage LinesToImg(const ini::Configuration &configuration,Lines2D& lines,bool WithZBuf=false);	// converts a list of line2D's into an images
+	static Lines2D figuresToLines2D(const ini::Configuration &configuration, std::vector<figure3D> &figures,bool WithZBuffer=false);
 	static Point2D projectPoint(const Vector3D &point,const double d);
+	static void draw_zbuf_line(ZBuffer & ZBuf, img::EasyImage & img, unsigned int x0, unsigned int y0,double z0,
+				unsigned int x1, unsigned int y1,double z1,const img::Color &color);
+	static double calculatePFactor(double x0,double y0,double x1,double y1,double xi,double yi);
 };
 #endif /* IMGUTILS_H_ */

@@ -49,9 +49,13 @@ img::EasyImage generate_image(const ini::Configuration &configuration)
 				Lines2D lines= l2dengine.L2D_ToLines(configuration);
 				return imgUtils::LinesToImg(configuration,lines);
 			}else if(typeString=="Wireframe"){
-					std::vector<figure3D> figures= engine3D.draw3D(configuration);
-					Lines2D lines=imgUtils::figuresToLines2D(configuration,figures);
-					return imgUtils::LinesToImg(configuration,lines);
+				std::vector<figure3D> figures= engine3D.draw3D(configuration);
+				Lines2D lines=imgUtils::figuresToLines2D(configuration,figures);
+				return imgUtils::LinesToImg(configuration,lines);
+			}else if(typeString=="ZBufferedWireframe"){
+				std::vector<figure3D> figures= engine3D.draw3D(configuration);
+				Lines2D lines=imgUtils::figuresToLines2D(configuration,figures,true);
+				return imgUtils::LinesToImg(configuration,lines,true);
 			}
 
 	return img::EasyImage();
