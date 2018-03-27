@@ -27,6 +27,6 @@ public:
 	static Point2D projectPoint(const Vector3D &point,const double d);
 	static void draw_zbuf_line(ZBuffer & ZBuf, img::EasyImage & img, unsigned int x0, unsigned int y0,double z0,
 				unsigned int x1, unsigned int y1,double z1,const img::Color &color);
-	static double calculatePFactor(double x0,double y0,double x1,double y1,double xi,double yi);
+	static double calculatePFactor(double za,double zb,double i,double a);
 };
 #endif /* IMGUTILS_H_ */

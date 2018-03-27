@@ -394,7 +394,7 @@ figure3D Engine3D::DrawTorus(const ini::Configuration &configuration, const int 
 	double R=configuration[figure]["R"].as_double_or_die();
 	int m=configuration[figure]["m"].as_int_or_die();
 	int n=configuration[figure]["n"].as_int_or_die();
-	for(int i=1;i<n+1;i++){
+	for(int i=0;i<n;i++){
 		for(int j=1;j<m+1;j++){
 			double u=2*i*M_PI/n;
 			double v=2*j*M_PI/m;
@@ -407,10 +407,10 @@ figure3D Engine3D::DrawTorus(const ini::Configuration &configuration, const int 
 	for(int i=0;i<n;i++){
 			for(int j=0;j<m;j++){
 				std::vector<int> points;
-				points.push_back(((i*n)+j)%newfig.points.size());
-				points.push_back((((i+1%n)*n)+j)%newfig.points.size());
-				points.push_back((((i+1%n)*n)+((j+1)%m))%newfig.points.size());
-				points.push_back((i*n+((j+1)%m))%newfig.points.size());
+				points.push_back((i*m)+j);
+				points.push_back((((i+1)%n)*m)+j);
+				points.push_back((((i+1)%n)*m)+((j+1)%m));
+				points.push_back((i*n+((j+1)%m)));
 				newfig.addFace(face3D(points));
 			}
 		}

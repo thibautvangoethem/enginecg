@@ -15,7 +15,7 @@ ZBuffer::ZBuffer(int width, int height) {
 	for(int i=0;i<height;i++){
 		std::vector<double> row;
 		for(int j=0;j<width;j++){
-			row.push_back(std::numeric_limits<double>::max());
+			row.push_back(std::numeric_limits<double>::infinity());
 		}
 		zBuf.push_back(row);
 	}

@@ -5,6 +5,7 @@
  *      Author: thibaut
  */
 #include "easy_image.h"
+#include "Color.h"
 #include "ini_configuration.h"
 #include "Color.h"
 #include "Point2D.h"
@@ -16,6 +17,8 @@
 #include "simpleGenerations.h"
 #include "ZBuffer.h"
 
+#include <cstdlib>
+#include <random>
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
@@ -75,24 +78,24 @@ EasyImage imgUtils::LinesToImg(const ini::Configuration &configuration,Lines2D& 
 		if(i.p2.y<ymin){
 			ymin=i.p2.y;
 		}
-		if(WithZBuf){
-			if(i.z1<Zmin){
-				Zmin=i.z1;
-			}
-			if(i.z2<Zmin){
-				Zmin=i.z2;
-			}
-		}
+//		if(WithZBuf){
+//			if(i.z1<Zmin){
+//				Zmin=i.z1;
+//			}
+//			if(i.z2<Zmin){
+//				Zmin=i.z2;
+//			}
+//		}
 
 	}
-	if(WithZBuf){
-		if(Zmin<0){
-			for(Line2D& line:lines){
-				line.z1+=Zmin;
-				line.z2+=Zmin;
-			}
-		}
-	}
+//	if(WithZBuf){
+//		if(Zmin<0){
+//			for(Line2D& line:lines){
+//				line.z1+=Zmin;
+//				line.z2+=Zmin;
+//			}
+//		}
+//	}
 	if(xmin<0||ymin<0){
 		Lines2D nieuwLines;
 		if(xmin<0&&ymin>=0){
@@ -127,15 +130,15 @@ EasyImage imgUtils::LinesToImg(const ini::Configuration &configuration,Lines2D& 
 			}
 			xmax-=xmin;
 			ymax-=ymin;
-			ymin=0;
-			xmin=0;
+			ymin=0.0;
+			xmin=0.0;
 		}
 
 	}
 
 	double imagex;
 	double imagey;
-	int size=configuration["General"]["size"].as_int_or_die();
+	double size=configuration["General"]["size"].as_double_or_die();
 	if(xmax>ymax){
 		imagex=size*((xmax-xmin)/xmax);
 		imagey=size*((ymax-ymin)/xmax);
@@ -149,10 +152,10 @@ EasyImage imgUtils::LinesToImg(const ini::Configuration &configuration,Lines2D& 
 	}
 	img::EasyImage image(roundToInt(imagex),roundToInt(imagey),Color(roundToInt(achtergrond[0]*255),roundToInt(achtergrond[1]*255),roundToInt(achtergrond[2]*255)));
 	double scale=0.95*(imagex/xmax-xmin);
-	double xmiddle=scale*(xmin+xmax)/2;
-	double ymiddle=scale*(ymin+ymax)/2;
-	double dx= (imagex/2)-xmiddle;
-	double dy=(imagey/2)-ymiddle;
+	double xmiddle=scale*(xmin+xmax)/2.0;
+	double ymiddle=scale*(ymin+ymax)/2.0;
+	double dx= (imagex/2.0)-xmiddle;
+	double dy=(imagey/2.0)-ymiddle;
 	std::cout<<"converting lines to the image"<<std::endl;
 	for(Line2D &i:lines){
 		i.p1.x*=scale;
@@ -161,15 +164,16 @@ EasyImage imgUtils::LinesToImg(const ini::Configuration &configuration,Lines2D& 
 		i.p2.y*=scale;
 	}
 	for(Line2D i:lines){
-		int x1=roundToInt((i.getp1().x)+dx);
-		int y1=roundToInt((i.getp1().y)+dy);
-		int x2=roundToInt((i.getp2().x)+dx);
-		int y2=roundToInt((i.getp2().y)+dy);
-		i.setp1(x1,y1);
-		i.setp2(x2,y2);
+		unsigned int x1=roundToInt((i.getp1().x)+dx);
+		unsigned int y1=roundToInt((i.getp1().y)+dy);
+		unsigned int x2=roundToInt((i.getp2().x)+dx);
+		unsigned int y2=roundToInt((i.getp2().y)+dy);
 		if(!WithZBuf){
 			image.draw_line(x1,y1,x2,y2,img::Color(i.color.red,i.color.green,i.color.blue));
 		}else{
+			if(i.z1>0||i.z2>0){
+				std::cout<<x1<<" "<<y1<<" "<<i.z1<<"waarde"<<x2<<" "<<y2<<" "<<i.z2<<std::endl;
+			}
 			img::Color col=img::Color(i.getColor().red,i.getColor().green,i.getColor().blue);
 			imgUtils::draw_zbuf_line(zbuf,image,x1,y1,i.z1,x2,y2,i.z2,col);
 		}
@@ -182,6 +186,7 @@ EasyImage imgUtils::LinesToImg(const ini::Configuration &configuration,Lines2D& 
 
 
 Lines2D imgUtils::figuresToLines2D(const ini::Configuration &configuration, std::vector<figure3D> &figures,bool WithZBuffer){
+//	srand(figures.size());
 	std::cout<<"begin converting figures to lines"<<std::endl;
 	Lines2D lines;
 	for(figure3D fig:figures){
@@ -195,12 +200,16 @@ Lines2D imgUtils::figuresToLines2D(const ini::Configuration &configuration, std:
 		}
 
 		for(face3D face:fig.faces){
+//			double r = (double)rand();
+//			double g = (double)rand();
+//			double b = (double)rand();
+//			fig.color=figColor::Color(r,g,b);
 			for(unsigned int i=0;i<face.pointsIndex.size();i++){
 				if(WithZBuffer){
 					if(i==face.pointsIndex.size()-1){
 						lines.push_back(Line2D(projectedPoints[face.pointsIndex[i]],projectedPoints[face.pointsIndex[0]],fig.color,ZBufferVec[face.pointsIndex[i]],ZBufferVec[face.pointsIndex[0]]));
 					}else{
-						lines.push_back(Line2D(projectedPoints[face.pointsIndex[i]],projectedPoints[face.pointsIndex[i+1]],fig.color,ZBufferVec[face.pointsIndex[i]],face.pointsIndex[i+1]));
+						lines.push_back(Line2D(projectedPoints[face.pointsIndex[i]],projectedPoints[face.pointsIndex[i+1]],fig.color,ZBufferVec[face.pointsIndex[i]],ZBufferVec[face.pointsIndex[i+1]]));
 					}
 
 				}else{
@@ -234,30 +243,40 @@ Point2D imgUtils::projectPoint(const Vector3D &point,const double d){
 void imgUtils::draw_zbuf_line(ZBuffer & ZBuf, img::EasyImage & img,unsigned int x0,unsigned int y0,double z0,
 				unsigned int x1,unsigned int y1,double z1,const img::Color &color){
 
+//	if(z0>0||z1>0){
+//		std::cout<<z0<<"waarde"<<z1<<std::endl;
+//	}
 	if (x0 == x1)
 		{
+
 			//special case for x0 == x1
 			for (unsigned int i = std::min(y0, y1); i <= std::max(y0, y1); i++)
 			{
-				double pfactor=imgUtils::calculatePFactor(std::min(x0,x1),std::min(y0,y1),std::max(x0,x1),std::max(y0,y1),x0,i);
-				double zi=1/((pfactor/z0)+((1-pfactor)/z1));
+				if(y0>y1){
+					std::swap(y0,y1);
+					std::swap(z0,z1);
+				}
+				double zfactor=imgUtils::calculatePFactor(z0,z1,i-std::min(y0, y1),(std::max(y0, y1)-std::min(y0, y1)));
 //				std::cout<<zi<<" "<<ZBuf.zBuffer[x0][i]<<" "<<x0<<" "<<i<<" "<<"0"<<std::endl;
-				if(zi<ZBuf.zBuffer[x0][i]){
-					ZBuf.zBuffer[x0][i]=zi;
+				if(zfactor<ZBuf.zBuffer[x0][i]){
+					ZBuf.zBuffer[x0][i]=zfactor;
 					img(x0, i) = color;
 				}
 			}
 		}
 		else if (y0 == y1)
 		{
+			if(x0>x1){
+				std::swap(x0,x1);
+				std::swap(z0,z1);
+			}
 			//special case for y0 == y1
 			for (unsigned int i = std::min(x0, x1); i <= std::max(x0, x1); i++)
 			{
-				double pfactor=imgUtils::calculatePFactor(std::min(x0,x1),std::min(y0,y1),std::max(x0,x1),std::max(y0,y1),i,y0);
-				double zi=1/((pfactor/z0)+((1-pfactor)/z1));
+				double zfactor=imgUtils::calculatePFactor(z0,z1,i-std::min(x0, x1),(std::max(x0, x1)-std::min(x0, x1)));
 //				std::cout<<zi<<" "<<ZBuf.zBuffer[i][y0]<<" "<<i<<" "<<y0<<" "<<"1"<<std::endl;
-				if(zi<ZBuf.zBuffer[i][y0]){
-					ZBuf.zBuffer[i][y0]=zi;
+				if(zfactor<ZBuf.zBuffer[i][y0]){
+					ZBuf.zBuffer[i][y0]=zfactor;
 					img(i, y0) = color;
 				}
 			}
@@ -276,12 +295,10 @@ void imgUtils::draw_zbuf_line(ZBuffer & ZBuf, img::EasyImage & img,unsigned int 
 			{
 				for (unsigned int i = 0; i <= (x1 - x0); i++)
 				{
-//					std::cout<<"a"<<std::endl;
-					double pfactor=imgUtils::calculatePFactor(std::min(x0,x1),std::min(y0,y1),std::max(x0,x1),std::max(y0,y1),x0+i,round(y0 + m * i));
-
-					double zi=1/((pfactor/z0)+((1-pfactor)/z1));
-					if(zi<ZBuf.zBuffer[x0+i][round(y0 + m * i)]){
-						ZBuf.zBuffer[x0+i][round(y0 + m * i)]=zi;
+					double zfactor=imgUtils::calculatePFactor(z0,z1,i,x1-x0);
+//					std::cout<<zi<<std::endl;
+					if(zfactor<ZBuf.zBuffer[x0+i][round(y0 + m * i)]){
+						ZBuf.zBuffer[x0+i][round(y0 + m * i)]=zfactor;
 						img(x0 + i, (unsigned int) round(y0 + m * i)) = color;
 					}
 				}
@@ -290,15 +307,12 @@ void imgUtils::draw_zbuf_line(ZBuffer & ZBuf, img::EasyImage & img,unsigned int 
 			{
 				for (unsigned int i = 0; i <= (y1 - y0); i++)
 				{
-					double pfactor=imgUtils::calculatePFactor(std::min(x0,x1),std::min(y0,y1),std::max(x0,x1),std::max(y0,y1),round(x0 + (i / m)),y0 + i);
-					double zi=1/((pfactor/z0)+((1-pfactor)/z1));
-//					std::cout<<zi<<" "<<ZBuf.zBuffer[round(x0 + (i / m))][y0 + i]<<" "<<round(x0 + (i / m))<<" "<<y0 + i<<" "<<"3"<<std::endl;
-					if(zi<ZBuf.zBuffer[round(x0 + (i / m))][y0 + i]){
-//						std::cout<<"c"<<std::endl;
-						ZBuf.zBuffer[round(x0 + (i / m))][y0 + i]=zi;
-//						std::cout<<"d"<<std::endl;
+					double zfactor=imgUtils::calculatePFactor(z0,z1,i,y1-y0);
+
+					if(zfactor<ZBuf.zBuffer[round(x0 + (i / m))][y0 + i]){
+//						std::cout<<zfactor<<" "<<ZBuf.zBuffer[round(x0 + (i / m))][y0 + i]<<" "<<round(x0 + (i / m))<<" "<<y0 + i<<" "<<"3"<<std::endl;
+						ZBuf.zBuffer[round(x0 + (i / m))][y0 + i]=zfactor;
 						img((unsigned int) round(x0 + (i / m)), y0 + i) = color;
-//						std::cout<<"e"<<std::endl;
 					}
 				}
 			}
@@ -306,11 +320,10 @@ void imgUtils::draw_zbuf_line(ZBuffer & ZBuf, img::EasyImage & img,unsigned int 
 			{
 				for (unsigned int i = 0; i <= (y0 - y1); i++)
 				{
-					double pfactor=imgUtils::calculatePFactor(std::min(x0,x1),std::min(y0,y1),std::max(x0,x1),std::max(y0,y1),round(x0 - (i / m)),y0 - i);
-					double zi=1/((pfactor/z0)+((1-pfactor)/z1));
+					double zfactor=imgUtils::calculatePFactor(z0,z1,i,y0-y1);
 //					std::cout<<zi<<" "<<ZBuf.zBuffer[round(x0 - (i / m))][y0 - i]<<" "<<round(x0 - (i / m))<<" "<<y0 - i<<" "<<"4"<<std::endl;
-					if(zi<ZBuf.zBuffer[round(x0 - (i / m))][y0 - i]){
-						ZBuf.zBuffer[round(x0 - (i / m))][y0 - i]=zi;
+					if(zfactor<ZBuf.zBuffer[round(x0 - (i / m))][y0 - i]){
+						ZBuf.zBuffer[round(x0 - (i / m))][y0 - i]=zfactor;
 						img((unsigned int) round(x0 - (i / m)), y0 - i) = color;
 					}
 				}
@@ -318,19 +331,10 @@ void imgUtils::draw_zbuf_line(ZBuffer & ZBuf, img::EasyImage & img,unsigned int 
 		}
 }
 
-double imgUtils::calculatePFactor(double x0,double y0,double x1,double y1,double xi,double yi){
-	double py=-1;
-	double px=-1;
-	if(x0-x1!=0){
-		px=(xi-x1)/(x0-x1);
-	}
-	if(y0-y1!=0){
-		py=(yi-y1)/(y0-y1);
-	}
-	if(py<0&&px<0){
-		return 0;
-	}
-	return std::max(px,py);
+double imgUtils::calculatePFactor(double za,double zb,double i,double a){
+//	std::cout<<za<<"factor"<<zb<<std::endl;
+	double p=((1-(i/a))/za)+i/a/zb;
+	return p;
 }
 
 
