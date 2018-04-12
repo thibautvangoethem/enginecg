@@ -47,95 +47,11 @@ imgUtils::~imgUtils() {
 
 EasyImage imgUtils::LinesToImg(const ini::Configuration &configuration,Lines2D& lines,bool WithZBuf){
 	std::vector<double> achtergrond=configuration["General"]["backgroundcolor"].as_double_tuple_or_die();
-	std::cout<<"start scaling lines"<<std::endl;
 	double xmax=std::numeric_limits<double>::min();
 	double xmin=std::numeric_limits<double>::max();
 	double ymax=std::numeric_limits<double>::min();
 	double ymin=std::numeric_limits<double>::max();
-	double Zmin=std::numeric_limits<double>::max();
-	for(Line2D i:lines){
-		if(i.p1.x>xmax){
-			xmax=i.p1.x;
-		}
-		if(i.p1.x<xmin){
-			xmin=i.p1.x;
-		}
-		if(i.p1.y>ymax){
-			ymax=i.p1.y;
-		}
-		if(i.p1.y<ymin){
-			ymin=i.p1.y;
-		}
-		if(i.p2.x>xmax){
-			xmax=i.p2.x;
-		}
-		if(i.p2.x<xmin){
-			xmin=i.p2.x;
-		}
-		if(i.p2.y>ymax){
-			ymax=i.p2.y;
-		}
-		if(i.p2.y<ymin){
-			ymin=i.p2.y;
-		}
-//		if(WithZBuf){
-//			if(i.z1<Zmin){
-//				Zmin=i.z1;
-//			}
-//			if(i.z2<Zmin){
-//				Zmin=i.z2;
-//			}
-//		}
-
-	}
-//	if(WithZBuf){
-//		if(Zmin<0){
-//			for(Line2D& line:lines){
-//				line.z1+=Zmin;
-//				line.z2+=Zmin;
-//			}
-//		}
-//	}
-	if(xmin<0||ymin<0){
-		Lines2D nieuwLines;
-		if(xmin<0&&ymin>=0){
-			for(Line2D& line:lines){
-				double tempx1=line.p1.x-xmin;
-				double tempx2=line.p2.x-xmin;
-				line.setp1(tempx1,line.p1.y);
-				line.setp2(tempx2,line.p2.y);
-				continue;
-						}
-			xmax-=xmin;
-			xmin=0;
-		}else if(ymin<0&&xmin>=0){
-			for(Line2D& line:lines){
-				double tempy1=line.p1.y-ymin;
-				double tempy2=line.p2.y-ymin;
-				line.setp1(line.p1.x,tempy1);
-				line.setp2(line.p2.x,tempy2);
-				continue;
-			}
-			ymax-=ymin;
-			ymin=0;
-		}else if(ymin<0&&xmin<0){
-			for(Line2D& line:lines){
-				double tempy1=line.p1.y-ymin;
-				double tempy2=line.p2.y-ymin;
-				double tempx1=line.p1.x-xmin;
-				double tempx2=line.p2.x-xmin;
-				line.setp1(tempx1,tempy1);
-				line.setp2(tempx2,tempy2);
-				continue;
-			}
-			xmax-=xmin;
-			ymax-=ymin;
-			ymin=0.0;
-			xmin=0.0;
-		}
-
-	}
-
+	imgUtils::moveToPos(lines,xmin,ymin,xmax,ymax);
 	double imagex;
 	double imagey;
 	double size=configuration["General"]["size"].as_double_or_die();
@@ -156,7 +72,6 @@ EasyImage imgUtils::LinesToImg(const ini::Configuration &configuration,Lines2D& 
 	double ymiddle=scale*(ymin+ymax)/2.0;
 	double dx= (imagex/2.0)-xmiddle;
 	double dy=(imagey/2.0)-ymiddle;
-	std::cout<<"converting lines to the image"<<std::endl;
 	for(Line2D &i:lines){
 		i.p1.x*=scale;
 		i.p1.y*=scale;
@@ -171,23 +86,86 @@ EasyImage imgUtils::LinesToImg(const ini::Configuration &configuration,Lines2D& 
 		if(!WithZBuf){
 			image.draw_line(x1,y1,x2,y2,img::Color(i.color.red,i.color.green,i.color.blue));
 		}else{
-			if(i.z1>0||i.z2>0){
-				std::cout<<x1<<" "<<y1<<" "<<i.z1<<"waarde"<<x2<<" "<<y2<<" "<<i.z2<<std::endl;
-			}
 			img::Color col=img::Color(i.getColor().red,i.getColor().green,i.getColor().blue);
 			imgUtils::draw_zbuf_line(zbuf,image,x1,y1,i.z1,x2,y2,i.z2,col);
 		}
 
 	}
-	std::cout<<"image created"<<std::endl;
 	return image;
 
 }
 
+void imgUtils::moveToPos(Lines2D& lines,double& xmin,double& ymin,double& xmax,double& ymax){
 
-Lines2D imgUtils::figuresToLines2D(const ini::Configuration &configuration, std::vector<figure3D> &figures,bool WithZBuffer){
-//	srand(figures.size());
-	std::cout<<"begin converting figures to lines"<<std::endl;
+		for(Line2D i:lines){
+			if(i.p1.x>xmax){
+				xmax=i.p1.x;
+			}
+			if(i.p1.x<xmin){
+				xmin=i.p1.x;
+			}
+			if(i.p1.y>ymax){
+				ymax=i.p1.y;
+			}
+			if(i.p1.y<ymin){
+				ymin=i.p1.y;
+			}
+			if(i.p2.x>xmax){
+				xmax=i.p2.x;
+			}
+			if(i.p2.x<xmin){
+				xmin=i.p2.x;
+			}
+			if(i.p2.y>ymax){
+				ymax=i.p2.y;
+			}
+			if(i.p2.y<ymin){
+				ymin=i.p2.y;
+			}
+		}
+		if(xmin<0||ymin<0){
+			Lines2D nieuwLines;
+			if(xmin<0&&ymin>=0){
+				for(Line2D& line:lines){
+					double tempx1=line.p1.x-xmin;
+					double tempx2=line.p2.x-xmin;
+					line.setp1(tempx1,line.p1.y);
+					line.setp2(tempx2,line.p2.y);
+					continue;
+							}
+				xmax-=xmin;
+				xmin=0;
+			}else if(ymin<0&&xmin>=0){
+				for(Line2D& line:lines){
+					double tempy1=line.p1.y-ymin;
+					double tempy2=line.p2.y-ymin;
+					line.setp1(line.p1.x,tempy1);
+					line.setp2(line.p2.x,tempy2);
+					continue;
+				}
+				ymax-=ymin;
+				ymin=0;
+			}else if(ymin<0&&xmin<0){
+				for(Line2D& line:lines){
+					double tempy1=line.p1.y-ymin;
+					double tempy2=line.p2.y-ymin;
+					double tempx1=line.p1.x-xmin;
+					double tempx2=line.p2.x-xmin;
+					line.setp1(tempx1,tempy1);
+					line.setp2(tempx2,tempy2);
+					continue;
+				}
+				xmax-=xmin;
+				ymax-=ymin;
+				ymin=0.0;
+				xmin=0.0;
+			}
+
+		}
+}
+
+
+Lines2D imgUtils::figuresToLines2D(std::vector<figure3D> &figures,bool WithZBuffer){
 	Lines2D lines;
 	for(figure3D fig:figures){
 		std::vector<Point2D> projectedPoints;
@@ -200,10 +178,6 @@ Lines2D imgUtils::figuresToLines2D(const ini::Configuration &configuration, std:
 		}
 
 		for(face3D face:fig.faces){
-//			double r = (double)rand();
-//			double g = (double)rand();
-//			double b = (double)rand();
-//			fig.color=figColor::Color(r,g,b);
 			for(unsigned int i=0;i<face.pointsIndex.size();i++){
 				if(WithZBuffer){
 					if(i==face.pointsIndex.size()-1){
@@ -242,10 +216,6 @@ Point2D imgUtils::projectPoint(const Vector3D &point,const double d){
 
 void imgUtils::draw_zbuf_line(ZBuffer & ZBuf, img::EasyImage & img,unsigned int x0,unsigned int y0,double z0,
 				unsigned int x1,unsigned int y1,double z1,const img::Color &color){
-
-//	if(z0>0||z1>0){
-//		std::cout<<z0<<"waarde"<<z1<<std::endl;
-//	}
 	if (x0 == x1)
 		{
 
@@ -256,8 +226,7 @@ void imgUtils::draw_zbuf_line(ZBuffer & ZBuf, img::EasyImage & img,unsigned int 
 					std::swap(y0,y1);
 					std::swap(z0,z1);
 				}
-				double zfactor=imgUtils::calculatePFactor(z0,z1,i-std::min(y0, y1),(std::max(y0, y1)-std::min(y0, y1)));
-//				std::cout<<zi<<" "<<ZBuf.zBuffer[x0][i]<<" "<<x0<<" "<<i<<" "<<"0"<<std::endl;
+				double zfactor=imgUtils::calculateZFactor(z0,z1,i-std::min(y0, y1),(std::max(y0, y1)-std::min(y0, y1)));
 				if(zfactor<ZBuf.zBuffer[x0][i]){
 					ZBuf.zBuffer[x0][i]=zfactor;
 					img(x0, i) = color;
@@ -273,8 +242,7 @@ void imgUtils::draw_zbuf_line(ZBuffer & ZBuf, img::EasyImage & img,unsigned int 
 			//special case for y0 == y1
 			for (unsigned int i = std::min(x0, x1); i <= std::max(x0, x1); i++)
 			{
-				double zfactor=imgUtils::calculatePFactor(z0,z1,i-std::min(x0, x1),(std::max(x0, x1)-std::min(x0, x1)));
-//				std::cout<<zi<<" "<<ZBuf.zBuffer[i][y0]<<" "<<i<<" "<<y0<<" "<<"1"<<std::endl;
+				double zfactor=imgUtils::calculateZFactor(z0,z1,i-std::min(x0, x1),(std::max(x0, x1)-std::min(x0, x1)));
 				if(zfactor<ZBuf.zBuffer[i][y0]){
 					ZBuf.zBuffer[i][y0]=zfactor;
 					img(i, y0) = color;
@@ -295,7 +263,7 @@ void imgUtils::draw_zbuf_line(ZBuffer & ZBuf, img::EasyImage & img,unsigned int 
 			{
 				for (unsigned int i = 0; i <= (x1 - x0); i++)
 				{
-					double zfactor=imgUtils::calculatePFactor(z0,z1,i,x1-x0);
+					double zfactor=imgUtils::calculateZFactor(z0,z1,i,x1-x0);
 //					std::cout<<zi<<std::endl;
 					if(zfactor<ZBuf.zBuffer[x0+i][round(y0 + m * i)]){
 						ZBuf.zBuffer[x0+i][round(y0 + m * i)]=zfactor;
@@ -307,7 +275,7 @@ void imgUtils::draw_zbuf_line(ZBuffer & ZBuf, img::EasyImage & img,unsigned int 
 			{
 				for (unsigned int i = 0; i <= (y1 - y0); i++)
 				{
-					double zfactor=imgUtils::calculatePFactor(z0,z1,i,y1-y0);
+					double zfactor=imgUtils::calculateZFactor(z0,z1,i,y1-y0);
 
 					if(zfactor<ZBuf.zBuffer[round(x0 + (i / m))][y0 + i]){
 //						std::cout<<zfactor<<" "<<ZBuf.zBuffer[round(x0 + (i / m))][y0 + i]<<" "<<round(x0 + (i / m))<<" "<<y0 + i<<" "<<"3"<<std::endl;
@@ -320,7 +288,7 @@ void imgUtils::draw_zbuf_line(ZBuffer & ZBuf, img::EasyImage & img,unsigned int 
 			{
 				for (unsigned int i = 0; i <= (y0 - y1); i++)
 				{
-					double zfactor=imgUtils::calculatePFactor(z0,z1,i,y0-y1);
+					double zfactor=imgUtils::calculateZFactor(z0,z1,i,y0-y1);
 //					std::cout<<zi<<" "<<ZBuf.zBuffer[round(x0 - (i / m))][y0 - i]<<" "<<round(x0 - (i / m))<<" "<<y0 - i<<" "<<"4"<<std::endl;
 					if(zfactor<ZBuf.zBuffer[round(x0 - (i / m))][y0 - i]){
 						ZBuf.zBuffer[round(x0 - (i / m))][y0 - i]=zfactor;
@@ -331,10 +299,121 @@ void imgUtils::draw_zbuf_line(ZBuffer & ZBuf, img::EasyImage & img,unsigned int 
 		}
 }
 
-double imgUtils::calculatePFactor(double za,double zb,double i,double a){
+double imgUtils::calculateZFactor(double za,double zb,double i,double a){
 //	std::cout<<za<<"factor"<<zb<<std::endl;
 	double p=((1-(i/a))/za)+i/a/zb;
 	return p;
 }
 
+EasyImage imgUtils::TrianglesToImg(const ini::Configuration &configuration,std::vector<figure3D>& figures,bool WithZBuf){
+	Lines2D projectedImg=imgUtils::figuresToLines2D(figures,WithZBuf);
+	double size=configuration["General"]["size"].as_double_or_die();
+	double xmax=std::numeric_limits<double>::min();
+	double xmin=std::numeric_limits<double>::max();
+	double ymax=std::numeric_limits<double>::min();
+	double ymin=std::numeric_limits<double>::max();
+	for(Line2D i:projectedImg){
+		if(i.p1.x>xmax){
+			xmax=i.p1.x;
+		}
+		if(i.p1.x<xmin){
+			xmin=i.p1.x;
+		}
+		if(i.p1.y>ymax){
+			ymax=i.p1.y;
+		}
+		if(i.p1.y<ymin){
+			ymin=i.p1.y;
+		}
+		if(i.p2.x>xmax){
+			xmax=i.p2.x;
+		}
+		if(i.p2.x<xmin){
+			xmin=i.p2.x;
+		}
+		if(i.p2.y>ymax){
+			ymax=i.p2.y;
+		}
+		if(i.p2.y<ymin){
+			ymin=i.p2.y;
+		}
+	}
+	double xrange=std::abs(xmax-xmin);
+	double yrange=std::abs(ymax-ymin);
+	double imagex=size*(xrange/std::max(xrange,yrange));
+	double imagey=size*(yrange/std::max(xrange,yrange));
+	double d=0.95*(imagex/xrange);
+	double DCx=d*(xmin+xmax)/2;
+	double DCy=d*(ymin+ymax)/2;
+	double dx=(imagex/2)-DCx;
+	double dy=(imagey/2)-DCy;
+	std::vector<double> achtergrond=configuration["General"]["backgroundcolor"].as_double_tuple_or_die();
+	img::EasyImage image(roundToInt(imagex),roundToInt(imagey),Color(roundToInt(achtergrond[0]*255),roundToInt(achtergrond[1]*255),roundToInt(achtergrond[2]*255)));
+	ZBuffer zbuf;
+	if(WithZBuf){
+		zbuf=ZBuffer(roundToInt(imagey),roundToInt(imagex));
+	}
+	for(figure3D driehoek:figures){
+		if(imgUtils::isTriangle(driehoek)){
+			std::vector<Vector3D> points=driehoek.points;
+			for(face3D driehoekFace:driehoek.faces){
+				std::vector<int> index=driehoekFace.pointsIndex;
+				imgUtils::draw_zbuf_triag(zbuf,image,points[index[0]],points[index[1]],points[index[2]],d,dx,dy,img::Color(driehoek.color.red,driehoek.color.green,driehoek.color.blue));
+			}
+		}
+	}
+	return image;
+}
+
+void imgUtils::draw_zbuf_triag(ZBuffer& buf, img::EasyImage& image,Vector3D const& A, Vector3D const& B, Vector3D const& C,double d, double dx, double dy, Color color){
+	Point2D A2=Point2D((d*A.x/-(A.z))+dx,(d*A.y/-(A.z))+dy);
+	Point2D B2=Point2D((d*B.x/-(B.z))+dx,(d*B.y/-(B.z))+dy);
+	Point2D C2=Point2D((d*C.x/-(C.z))+dx,(d*C.y/-(C.z))+dy);
+	if(A2.y==B2.y&&A2.y==C2.y){
+		image.draw_line(roundToInt(A2.x),roundToInt(A2.y),roundToInt(B2.x),roundToInt(B2.y),color);
+		image.draw_line(roundToInt(C2.x),roundToInt(C2.y),roundToInt(B2.x),roundToInt(B2.y),color);
+	}else{
+		for(double i=round(std::min(A2.y,std::min(B2.y,C2.y))+0.5);i<=round(std::max(A2.y,std::max(B2.y,C2.y)))-0.5;i++){
+			double xrab=std::numeric_limits<double>::min();
+			double xrac=std::numeric_limits<double>::min();
+			double xrbc=std::numeric_limits<double>::min();
+			double xlab=std::numeric_limits<double>::max();
+			double xlac=std::numeric_limits<double>::max();
+			double xlbc=std::numeric_limits<double>::max();
+			//A=P B=Q
+			if((i-A2.y)*(i-B2.y)<=0){
+				if(A2.y!=B2.y){
+					xrab=B2.x+(A2.x-B2.x)*((i-B2.y)/(A2.y-B2.y));
+					xlab=xrab;
+				}
+			}
+			//A=P C=Q
+			if((i-A2.y)*(i-C2.y)<=0){
+				if(A2.y!=C2.y){
+					xrac=C2.x+(A2.x-C2.x)*((i-C2.y)/(A2.y-C2.y));
+					xlac=xrac;
+				}
+			}
+			//B=P C=Q
+			if((i-B2.y)*(i-C2.y)<=0){
+				if(B2.y!=C2.y){
+					xrbc=C2.x+(B2.x-C2.x)*((i-C2.y)/(B2.y-C2.y));
+					xlbc=xrbc;
+				}
+			}
+			int xl=std::min(xlab,std::min(xlac,xlbc))+0.5;
+			int xr=std::max(xrab,std::max(xrac,xrbc))-0.5;
+			image.draw_line(xl,roundToInt(i),xr,roundToInt(i),color);
+		}
+	}
+}
+
+bool imgUtils::isTriangle(figure3D fig){
+	for(auto i:fig.faces){
+		if(i.pointsIndex.size()!=3){
+			return false;
+		}
+	}
+	return true;
+}
 

@@ -50,12 +50,18 @@ img::EasyImage generate_image(const ini::Configuration &configuration)
 				return imgUtils::LinesToImg(configuration,lines);
 			}else if(typeString=="Wireframe"){
 				std::vector<figure3D> figures= engine3D.draw3D(configuration);
-				Lines2D lines=imgUtils::figuresToLines2D(configuration,figures);
+				Lines2D lines=imgUtils::figuresToLines2D(figures);
 				return imgUtils::LinesToImg(configuration,lines);
 			}else if(typeString=="ZBufferedWireframe"){
 				std::vector<figure3D> figures= engine3D.draw3D(configuration);
-				Lines2D lines=imgUtils::figuresToLines2D(configuration,figures,true);
+				Lines2D lines=imgUtils::figuresToLines2D(figures,true);
 				return imgUtils::LinesToImg(configuration,lines,true);
+			}else if(typeString=="ZBuffering"){
+				std::vector<figure3D> figures= engine3D.draw3D(configuration);
+				for(auto &fig:figures){
+					fig.triangulate();
+				}
+				return imgUtils::TrianglesToImg(configuration,figures,true);
 			}
 
 	return img::EasyImage();

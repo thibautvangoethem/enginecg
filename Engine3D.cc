@@ -34,10 +34,8 @@ Engine3D::~Engine3D() {
 }
 
 std::vector<figure3D> Engine3D::draw3D(const ini::Configuration &configuration){
-	std::cout<<"Starting initializing 3D image"<<std::endl;
 	std::vector<figure3D> figures;
 	int nrfigures=configuration["General"]["nrFigures"].as_int_or_die();
-	std::cout<<"Start reading figures"<<std::endl;
 	for(int figcount=0;figcount<nrfigures;figcount++){
 			std::string figure="Figure"+std::to_string(figcount);
 			std::string figureType=configuration[figure]["type"].as_string_or_die();
@@ -87,7 +85,6 @@ std::vector<figure3D> Engine3D::draw3D(const ini::Configuration &configuration){
 			newfig.translate(transVector);
 			figures.push_back(newfig);
 		}
-	std::cout<<"starting eye-transformation"<<std::endl;
 	std::vector<double> eyeCoords=configuration["General"]["eye"].as_double_tuple_or_die();
 	Vector3D eyeVector=Vector3D::vector(eyeCoords[0],eyeCoords[1],eyeCoords[2]);
 	Matrix eyeMatrix=Engine3D::eyePointTrans(eyeVector);

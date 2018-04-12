@@ -32,6 +32,7 @@ public:
 	void translate(const Vector3D vec);
 	void addFace(face3D face);
 	void addPoint(Vector3D v);
+	void triangulate();
 	static double toRadian(double angle);
 };
 

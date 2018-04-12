@@ -79,3 +79,13 @@ double figure3D::toRadian(double angle){
 	return angle/180*M_PI;
 }
 
+void figure3D::triangulate(){
+	std::vector<face3D> nieuwfaces;
+	for(auto face:faces){
+		for(unsigned int i=1;i<face.pointsIndex.size()-1;i++){
+			std::vector<int> nieuwPunten={face.pointsIndex[0],face.pointsIndex[i],face.pointsIndex[i+1]};
+			nieuwfaces.push_back(face3D(nieuwPunten));
+		}
+	}
+	faces=nieuwfaces;
+}
