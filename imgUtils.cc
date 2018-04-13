@@ -369,10 +369,20 @@ void imgUtils::draw_zbuf_triag(ZBuffer& buf, img::EasyImage& image,Vector3D cons
 	Point2D A2=Point2D((d*A.x/-(A.z))+dx,(d*A.y/-(A.z))+dy);
 	Point2D B2=Point2D((d*B.x/-(B.z))+dx,(d*B.y/-(B.z))+dy);
 	Point2D C2=Point2D((d*C.x/-(C.z))+dx,(d*C.y/-(C.z))+dy);
-	if(A2.y==B2.y&&A2.y==C2.y){
-		image.draw_line(roundToInt(A2.x),roundToInt(A2.y),roundToInt(B2.x),roundToInt(B2.y),color);
-		image.draw_line(roundToInt(C2.x),roundToInt(C2.y),roundToInt(B2.x),roundToInt(B2.y),color);
-	}else{
+	image.draw_line(roundToInt(A2.x),roundToInt(A2.y),roundToInt(B2.x),roundToInt(B2.y),color);
+	image.draw_line(roundToInt(C2.x),roundToInt(C2.y),roundToInt(B2.x),roundToInt(B2.y),color);
+	image.draw_line(roundToInt(C2.x),roundToInt(C2.y),roundToInt(A2.x),roundToInt(A2.y),color);
+//	if(roundToInt(A2.y)==roundToInt(B2.y)&&roundToInt(A2.y)==roundToInt(C2.y)){
+//		image.draw_line(roundToInt(A2.x),roundToInt(A2.y),roundToInt(B2.x),roundToInt(B2.y),color);
+//		image.draw_line(roundToInt(C2.x),roundToInt(C2.y),roundToInt(B2.x),roundToInt(B2.y),color);
+//		image.draw_line(roundToInt(C2.x),roundToInt(C2.y),roundToInt(A2.x),roundToInt(A2.y),color);
+//		image.draw_line(roundToInt(A2.x+0.5),roundToInt(A2.y+0.5),roundToInt(B2.x-0.5),roundToInt(B2.y-0.5),color);
+//		image.draw_line(roundToInt(C2.x+0.5),roundToInt(C2.y+0.5),roundToInt(B2.x-0.5),roundToInt(B2.y-0.5),color);
+//		image.draw_line(roundToInt(C2.x+0.5),roundToInt(C2.y+0.5),roundToInt(A2.x-0.5),roundToInt(A2.y-0.5),color);
+//		image.draw_line(roundToInt(A2.x-0.5),roundToInt(A2.y-0.5),roundToInt(B2.x+0.5),roundToInt(B2.y+0.5),color);
+//		image.draw_line(roundToInt(C2.x-0.5),roundToInt(C2.y-0.5),roundToInt(B2.x+0.5),roundToInt(B2.y+0.5),color);
+//		image.draw_line(roundToInt(C2.x-0.5),roundToInt(C2.y-0.5),roundToInt(A2.x+0.5),roundToInt(A2.y+0.5),color);
+//	}else{
 		for(double i=round(std::min(A2.y,std::min(B2.y,C2.y))+0.5);i<=round(std::max(A2.y,std::max(B2.y,C2.y)))-0.5;i++){
 			double xrab=std::numeric_limits<double>::min();
 			double xrac=std::numeric_limits<double>::min();
@@ -401,11 +411,12 @@ void imgUtils::draw_zbuf_triag(ZBuffer& buf, img::EasyImage& image,Vector3D cons
 					xlbc=xrbc;
 				}
 			}
-			int xl=std::min(xlab,std::min(xlac,xlbc))+0.5;
-			int xr=std::max(xrab,std::max(xrac,xrbc))-0.5;
+
+			int xl=roundToInt(std::min(xlab,std::min(xlac,xlbc))+0.5);
+			int xr=roundToInt(std::max(xrab,std::max(xrac,xrbc))-0.5);
 			image.draw_line(xl,roundToInt(i),xr,roundToInt(i),color);
 		}
-	}
+
 }
 
 bool imgUtils::isTriangle(figure3D fig){

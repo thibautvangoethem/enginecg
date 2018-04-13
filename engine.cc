@@ -62,6 +62,8 @@ img::EasyImage generate_image(const ini::Configuration &configuration)
 					fig.triangulate();
 				}
 				return imgUtils::TrianglesToImg(configuration,figures,true);
+//				Lines2D lines=imgUtils::figuresToLines2D(figures,true);
+//				return imgUtils::LinesToImg(configuration,lines,true);
 			}
 
 	return img::EasyImage();
