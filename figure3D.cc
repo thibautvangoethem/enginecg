@@ -76,7 +76,7 @@ void figure3D::translate(const Vector3D vec){
 }
 
 double figure3D::toRadian(double angle){
-	return angle/180*M_PI;
+	return angle/180.0*M_PI;
 }
 
 void figure3D::triangulate(){

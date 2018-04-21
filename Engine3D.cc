@@ -19,9 +19,10 @@
 #include <list>
 #include <cmath>
 #include <math.h>
-#include <vector>
 #include "Line2D.h"
 #include "L3DEngine.h"
+#include "Fractals3D.h"
+#include <algorithm>
 
 typedef std::list<Line2D> Lines2D;
 inline int roundToInt(double d)
@@ -62,6 +63,58 @@ std::vector<figure3D> Engine3D::draw3D(const ini::Configuration &configuration){
 				newfig=Engine3D::DrawTorus(configuration,figcount);
 			}else if(configuration[figure]["type"].as_string_or_die()=="3DLSystem"){
 				newfig=L3DEngine::L3D_ToFigure(configuration,figcount);
+			}else if(configuration[figure]["type"].as_string_or_die()=="Cube"){
+				newfig=Engine3D::DrawCube(configuration,figcount);
+			}else if(configuration[figure]["type"].as_string_or_die()=="BuckyBall"){
+				newfig=Engine3D::DrawBuckyBall(configuration,figcount);
+			}else if(configuration[figure]["type"].as_string_or_die()=="FractalCube"){
+				newfig=Engine3D::DrawCube(configuration,figcount);
+				std::vector<figure3D> fractals;
+				int iterations=configuration[figure]["nrIterations"].as_int_or_die();
+				double scale=configuration[figure]["fractalScale"].as_double_or_die();
+				Fractals3D::generateFractal(newfig,fractals,iterations,scale);
+				newfig=Engine3D::combineFigures(fractals);
+			}else if(configuration[figure]["type"].as_string_or_die()=="FractalTetrahedron"){
+				newfig=Engine3D::DrawTetrahedron(configuration,figcount);
+				std::vector<figure3D> fractals;
+				int iterations=configuration[figure]["nrIterations"].as_int_or_die();
+				double scale=configuration[figure]["fractalScale"].as_double_or_die();
+				Fractals3D::generateFractal(newfig,fractals,iterations,scale);
+				newfig=Engine3D::combineFigures(fractals);
+			}else if(configuration[figure]["type"].as_string_or_die()=="FractalIcosahedron"){
+				newfig=Engine3D::DrawIcosahedron(configuration,figcount);
+				std::vector<figure3D> fractals;
+				int iterations=configuration[figure]["nrIterations"].as_int_or_die();
+				double scale=configuration[figure]["fractalScale"].as_double_or_die();
+				Fractals3D::generateFractal(newfig,fractals,iterations,scale);
+				newfig=Engine3D::combineFigures(fractals);
+			}else if(configuration[figure]["type"].as_string_or_die()=="FractalOctahedron"){
+				newfig=Engine3D::DrawOctahedron(configuration,figcount);
+				std::vector<figure3D> fractals;
+				int iterations=configuration[figure]["nrIterations"].as_int_or_die();
+				double scale=configuration[figure]["fractalScale"].as_double_or_die();
+				Fractals3D::generateFractal(newfig,fractals,iterations,scale);
+				newfig=Engine3D::combineFigures(fractals);
+			}else if(configuration[figure]["type"].as_string_or_die()=="FractalDodecahedron"){
+				newfig=Engine3D::DrawDodecahedron(configuration,figcount);
+				std::vector<figure3D> fractals;
+				int iterations=configuration[figure]["nrIterations"].as_int_or_die();
+				double scale=configuration[figure]["fractalScale"].as_double_or_die();
+				Fractals3D::generateFractal(newfig,fractals,iterations,scale);
+				newfig=Engine3D::combineFigures(fractals);
+			}else if(configuration[figure]["type"].as_string_or_die()=="MengerSponge"){
+				newfig=Engine3D::DrawCube(configuration,figcount);
+				std::vector<figure3D> fractals;
+				int iterations=configuration[figure]["nrIterations"].as_int_or_die();
+				Fractals3D::createMengerSponge(newfig,fractals,iterations);
+				newfig=Engine3D::combineFigures(fractals);
+			}else if(configuration[figure]["type"].as_string_or_die()=="FractalBuckyBall"){
+				newfig=Engine3D::DrawBuckyBall(configuration,figcount);
+				std::vector<figure3D> fractals;
+				int iterations=configuration[figure]["nrIterations"].as_int_or_die();
+				double scale=configuration[figure]["fractalScale"].as_double_or_die();
+				Fractals3D::generateFractal(newfig,fractals,iterations,scale);
+				newfig=Engine3D::combineFigures(fractals);
 			}
 			int rotatex=configuration[figure]["rotateX"].as_double_or_die();
 			int rotatey=configuration[figure]["rotateY"].as_double_or_die();
@@ -447,3 +500,124 @@ Matrix Engine3D::eyePointTrans(const Vector3D &eyepoint){
 	eyePointMatrix(4,3)=-r;
 	return eyePointMatrix;
 }
+
+figure3D Engine3D::combineFigures(std::vector<figure3D> figures){
+	figure3D newfig=figure3D(figures[0].color);
+	int pointcount=0;
+	for(figure3D fig:figures){
+		for(auto i:fig.points){
+			newfig.addPoint(i);
+		}
+		for(auto i:fig.faces){
+			face3D newface;
+			for(int newpoint:i.pointsIndex){
+				newface.addPoint(newpoint+pointcount);
+			}
+			newfig.addFace(newface);
+		}
+		pointcount+=fig.points.size();
+	}
+	return newfig;
+}
+
+figure3D Engine3D::DrawBuckyBall(const ini::Configuration &configuration, const int figcount){
+	std::string figure="Figure"+std::to_string(figcount);
+	std::vector<double> kleur=configuration[figure]["color"].as_double_tuple_or_die();
+	figure3D icosahedron=Engine3D::DrawIcosahedron(configuration,figcount);
+	std::vector<face3D> triangles;
+	std::vector<face3D> hexagons;
+	int pointcounter=0;
+	figure3D bucky(figColor::Color(roundToInt(255*kleur[0]),roundToInt(255*kleur[1]),roundToInt(255*kleur[2])));
+	for(face3D face:icosahedron.faces){
+		for(unsigned int i=0;i<face.pointsIndex.size();i++){
+			bucky.addPoint(icosahedron.points[face.pointsIndex[i]]);
+			Vector3D linelength=icosahedron.points[(face.pointsIndex[(i+1)%3])]-icosahedron.points[face.pointsIndex[i]];
+			linelength.x=linelength.x/3;
+			linelength.y=linelength.y/3;
+			linelength.z=linelength.z/3;
+			bucky.addPoint(icosahedron.points[face.pointsIndex[i]]+linelength);
+			bucky.addPoint(icosahedron.points[(face.pointsIndex[(i+1)%3])]-linelength);
+		}
+		std::vector<int> tempPoints;
+		face3D newface;
+		tempPoints={pointcounter+1,pointcounter+2,pointcounter+4,pointcounter+5,pointcounter+7,pointcounter+8};
+		newface.pointsIndex=tempPoints;
+		hexagons.push_back(newface);
+		tempPoints={pointcounter+0,pointcounter+1,pointcounter+8};
+		newface.pointsIndex=tempPoints;
+		triangles.push_back(newface);
+		tempPoints={pointcounter+3,pointcounter+2,pointcounter+4};
+		newface.pointsIndex=tempPoints;
+		triangles.push_back(newface);
+		tempPoints={pointcounter+5,pointcounter+6,pointcounter+7};
+		newface.pointsIndex=tempPoints;
+		triangles.push_back(newface);
+		pointcounter+=9;
+
+	}
+	std::vector<int> alreadyused;
+	for(auto triang:triangles){
+
+		for(int outerpoint:triang.pointsIndex){
+			std::vector<face3D> founded={triang};
+			std::vector<int> samepoints;
+			bool found=false;
+			for(int b:alreadyused){
+				if(b==outerpoint){
+					found=true;
+				}
+			}
+			if(!found){
+				for(auto innertriang:triangles){
+					if(innertriang.pointsIndex!=triang.pointsIndex){
+						for(int innerpoint:innertriang.pointsIndex){
+							if(bucky.points[outerpoint].x==bucky.points[innerpoint].x&&bucky.points[outerpoint].y==bucky.points[innerpoint].y&&bucky.points[outerpoint].z==bucky.points[innerpoint].z){
+								samepoints.push_back(outerpoint);
+								samepoints.push_back(innerpoint);
+								founded.push_back(innertriang);
+							}
+						}
+					}
+				}
+			}
+		if(founded.size()==5){
+			face3D newface;
+			for(face3D face:founded){
+				for(int testpoint:face.pointsIndex){
+					bool insamepoint=false;
+					bool inface=false;
+					for(int i:samepoints){
+						if(testpoint==i){
+							insamepoint=true;
+						}
+
+					}
+					for(int i:newface.pointsIndex){
+						if(testpoint==i){
+							inface=true;
+						}
+						if(bucky.points[i].x==bucky.points[testpoint].x&&bucky.points[i].y==bucky.points[testpoint].y&&bucky.points[i].z==bucky.points[testpoint].z){
+							inface=true;
+						}
+					}
+					if(!insamepoint&&!inface){
+						newface.addPoint(testpoint);
+					}
+				}
+			}
+			std::sort (newface.pointsIndex.begin(),newface.pointsIndex.end());
+			bucky.addFace(newface);
+		}
+
+			for(int i:samepoints){
+				alreadyused.push_back(i);
+			}
+
+		}
+	}
+//	for(auto i:hexagons){
+//		bucky.addFace(i);
+//	}
+	return bucky;
+}
+
