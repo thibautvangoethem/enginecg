@@ -605,19 +605,85 @@ figure3D Engine3D::DrawBuckyBall(const ini::Configuration &configuration, const 
 					}
 				}
 			}
-			std::sort (newface.pointsIndex.begin(),newface.pointsIndex.end());
-			bucky.addFace(newface);
+			face3D newerface;
+			int startpoint=newface.pointsIndex[0];
+			int currentpoint=newface.pointsIndex[0];
+			std::vector<int> alreadyfound={startpoint};
+			for(unsigned int point=0;point<5;point++){
+				for(auto hex:hexagons){
+					for(auto hexpoint:hex.pointsIndex){
+						if(bucky.points[hexpoint].x==bucky.points[currentpoint].x&&bucky.points[hexpoint].y==bucky.points[currentpoint].y&&bucky.points[hexpoint].z==bucky.points[currentpoint].z){
+							for(int hexpoint2:hex.pointsIndex){
+								for(int facepoint:newface.pointsIndex){
+									if(bucky.points[hexpoint2].x==bucky.points[facepoint].x&&bucky.points[hexpoint2].y==bucky.points[facepoint].y&&bucky.points[hexpoint2].z==bucky.points[facepoint].z){
+										bool alreadyfoundbool=false;
+										for(int search:alreadyfound){
+											if(bucky.points[search].x==bucky.points[facepoint].x&&bucky.points[search].y==bucky.points[facepoint].y&&bucky.points[search].z==bucky.points[facepoint].z){
+												alreadyfoundbool=true;
+											}
+										}
+										if(!alreadyfoundbool){
+											newerface.addPoint(hexpoint);
+											newerface.addPoint(hexpoint2);
+											alreadyfound.push_back(hexpoint2);
+											currentpoint=hexpoint2;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			bucky.addFace(newerface);
 		}
-
 			for(int i:samepoints){
 				alreadyused.push_back(i);
 			}
 
 		}
 	}
-//	for(auto i:hexagons){
-//		bucky.addFace(i);
-//	}
+	for(auto i:hexagons){
+		bucky.addFace(i);
+	}
+	std::vector<int> usedpoints;
+	for(face3D face:bucky.faces){
+		for(int point:face.pointsIndex){
+			bool found=false;
+			for(int i:usedpoints){
+				if(i==point){
+					found=true;
+				}
+			}
+			if(!found){
+				usedpoints.push_back(point);
+			}
+		}
+	}
+	for(unsigned int i=0;i<bucky.points.size();i++){
+		bool used=false;
+		for(int b:usedpoints){
+			if(i==b){
+				used=true;
+			}
+		}
+		if(!used){
+			for(face3D& face:bucky.faces){
+					for(int& point:face.pointsIndex){
+						if(point>i){
+							point--;
+						}
+					}
+				}
+			for(int& point:usedpoints){
+				if(point>i){
+					point--;
+				}
+			}
+			bucky.points.erase (bucky.points.begin()+i);
+			i--;
+		}
+	}
 	return bucky;
 }
 
