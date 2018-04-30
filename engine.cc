@@ -11,6 +11,8 @@
 #include "imgUtils.h"
 #include "L2DEngine.h"
 #include "Engine3D.h"
+#include "Light.h"
+#include "Color.h"
 
 #include <fstream>
 #include <iostream>
@@ -61,10 +63,28 @@ img::EasyImage generate_image(const ini::Configuration &configuration)
 				for(auto &fig:figures){
 					fig.triangulate();
 				}
-				return imgUtils::TrianglesToImg(configuration,figures,true);
-//				Lines2D lines=imgUtils::figuresToLines2D(figures,true);
-//				return imgUtils::LinesToImg(configuration,lines,true);
+				Light *l=new Light(figColor::Color(1,1,1),figColor::Color(0,0,0),figColor::Color(0,0,0));
+				std::vector<Light*> lights;
+				lights.push_back(l);
+				EasyImage img= imgUtils::TrianglesToImg(configuration,figures,true,lights);
+				for(auto i:lights){
+					delete i;
+				}
+				return img;
+			}else if(typeString=="LightedZBuffering"){
+				std::vector<figure3D> figures= engine3D.draw3D(configuration);
+				for(auto &fig:figures){
+					fig.triangulate();
+				}
+				std::vector<Light*> lights=Engine3D::readLights(configuration);
+				EasyImage img= imgUtils::TrianglesToImg(configuration,figures,true,lights);
+				for(auto i:lights){
+					delete i;
+				}
+				return img;
+
 			}
+
 
 	return img::EasyImage();
 }

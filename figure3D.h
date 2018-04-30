@@ -17,13 +17,19 @@
 
 class figure3D {
 public:
-	figure3D(figColor::Color co ): color(co){
-		std::vector<face3D> faces;
+	figure3D(figColor::Color amr,figColor::Color difr=figColor::Color(0,0,0),figColor::Color specr=figColor::Color(0,0,0), double ref=0):
+			ambientReflection(amr), difusseReflection(difr), specularReflection(specr), reflectionCoefficient(ref){
+			std::vector<face3D> faces;
 	};
-	figure3D(std::vector<face3D> fa,figColor::Color co ): faces(fa), color(co){};
+	figure3D(std::vector<face3D> fa,figColor::Color amr,figColor::Color difr,figColor::Color specr,double ref ):
+		faces(fa),ambientReflection(amr), difusseReflection(difr),specularReflection(specr),reflectionCoefficient(ref){};
 	std::vector<Vector3D> points;
 	std::vector<face3D> faces;
-	figColor::Color color;
+	figColor::Color ambientReflection;
+	figColor::Color difusseReflection;
+	figColor::Color specularReflection;
+	double reflectionCoefficient;
+
 	virtual ~figure3D(){};
 	void scaleFigure(const double scaleFactor);
 	void rotateX(double angle);

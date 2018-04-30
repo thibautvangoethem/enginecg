@@ -148,8 +148,37 @@ std::vector<figure3D> Engine3D::draw3D(const ini::Configuration &configuration){
 
 figure3D Engine3D::LineDrawing(const ini::Configuration &configuration,int figcount){
 	std::string figure="Figure"+std::to_string(figcount);
-	std::vector<double> kleur=configuration[figure]["color"].as_double_tuple_or_die();
-	figure3D newfig=figure3D(figColor::Color(roundToInt(255*kleur[0]),roundToInt(255*kleur[1]),roundToInt(255*kleur[2])));
+	std::vector<double> kleur;
+		std::vector<double> kleur2;
+		std::vector<double> kleur3;
+		bool kleurbool=configuration[figure]["color"].as_double_tuple_if_exists(kleur);
+		double ref;
+		if(kleurbool){
+			kleur=configuration[figure]["color"].as_double_tuple_or_die();
+			kleur2={0,0,0};
+			kleur3={0,0,0};
+			ref=0;
+		}else{
+			kleur=configuration[figure]["ambientReflection"].as_double_tuple_or_die();
+			bool testbool=configuration[figure]["diffuseReflection"].as_double_tuple_if_exists(kleur2);
+			if(testbool){
+				kleur2=configuration[figure]["diffuseReflection"].as_double_tuple_or_die();
+			}else{
+				kleur2={0,0,0};
+			}
+			testbool=configuration[figure]["specularReflection"].as_double_tuple_if_exists(kleur3);
+			if(testbool){
+				kleur3=configuration[figure]["specularReflection"].as_double_tuple_or_die();
+			ref=configuration[figure]["reflectionCoefficient"].as_double_or_die();
+			}else{
+				kleur3={0,0,0};
+				ref=0;
+			}
+		}
+	figure3D newfig=figure3D(
+		figColor::Color(kleur[0],kleur[1],kleur[2]),
+		figColor::Color(kleur2[0],kleur2[1],kleur2[2]),
+		figColor::Color(kleur3[0],kleur3[1],kleur3[2]),ref);
 	int nrPoints=configuration[figure]["nrPoints"].as_int_or_die();
 	int nrLines=configuration[figure]["nrLines"].as_int_or_die();
 	for(int pointcount=0;pointcount<nrPoints;pointcount++){
@@ -165,8 +194,37 @@ figure3D Engine3D::LineDrawing(const ini::Configuration &configuration,int figco
 }
 figure3D Engine3D::DrawCube(const ini::Configuration &configuration,int figcount){
 	std::string figure="Figure"+std::to_string(figcount);
-	std::vector<double> kleur=configuration[figure]["color"].as_double_tuple_or_die();
-	figure3D newfig=figure3D(figColor::Color(roundToInt(255*kleur[0]),roundToInt(255*kleur[1]),roundToInt(255*kleur[2])));
+	std::vector<double> kleur;
+		std::vector<double> kleur2;
+		std::vector<double> kleur3;
+		bool kleurbool=configuration[figure]["color"].as_double_tuple_if_exists(kleur);
+		double ref;
+		if(kleurbool){
+			kleur=configuration[figure]["color"].as_double_tuple_or_die();
+			kleur2={0,0,0};
+			kleur3={0,0,0};
+			ref=0;
+		}else{
+			kleur=configuration[figure]["ambientReflection"].as_double_tuple_or_die();
+			bool testbool=configuration[figure]["diffuseReflection"].as_double_tuple_if_exists(kleur2);
+			if(testbool){
+				kleur2=configuration[figure]["diffuseReflection"].as_double_tuple_or_die();
+			}else{
+				kleur2={0,0,0};
+			}
+			testbool=configuration[figure]["specularReflection"].as_double_tuple_if_exists(kleur3);
+			if(testbool){
+				kleur3=configuration[figure]["specularReflection"].as_double_tuple_or_die();
+			ref=configuration[figure]["reflectionCoefficient"].as_double_or_die();
+			}else{
+				kleur3={0,0,0};
+				ref=0;
+			}
+		}
+	figure3D newfig=figure3D(
+		figColor::Color(kleur[0],kleur[1],kleur[2]),
+		figColor::Color(kleur2[0],kleur2[1],kleur2[2]),
+		figColor::Color(kleur3[0],kleur3[1],kleur3[2]),ref);
 	newfig.addPoint(Vector3D::point(1,-1,-1));
 	newfig.addPoint(Vector3D::point(-1,1,-1));
 	newfig.addPoint(Vector3D::point(1,1,1));
@@ -191,8 +249,37 @@ figure3D Engine3D::DrawCube(const ini::Configuration &configuration,int figcount
 }
 figure3D Engine3D::DrawTetrahedron(const ini::Configuration &configuration,int figcount){
 	std::string figure="Figure"+std::to_string(figcount);
-	std::vector<double> kleur=configuration[figure]["color"].as_double_tuple_or_die();
-	figure3D newfig=figure3D(figColor::Color(roundToInt(255*kleur[0]),roundToInt(255*kleur[1]),roundToInt(255*kleur[2])));
+	std::vector<double> kleur;
+		std::vector<double> kleur2;
+		std::vector<double> kleur3;
+		bool kleurbool=configuration[figure]["color"].as_double_tuple_if_exists(kleur);
+		double ref;
+		if(kleurbool){
+			kleur=configuration[figure]["color"].as_double_tuple_or_die();
+			kleur2={0,0,0};
+			kleur3={0,0,0};
+			ref=0;
+		}else{
+			kleur=configuration[figure]["ambientReflection"].as_double_tuple_or_die();
+			bool testbool=configuration[figure]["diffuseReflection"].as_double_tuple_if_exists(kleur2);
+			if(testbool){
+				kleur2=configuration[figure]["diffuseReflection"].as_double_tuple_or_die();
+			}else{
+				kleur2={0,0,0};
+			}
+			testbool=configuration[figure]["specularReflection"].as_double_tuple_if_exists(kleur3);
+			if(testbool){
+				kleur3=configuration[figure]["specularReflection"].as_double_tuple_or_die();
+			ref=configuration[figure]["reflectionCoefficient"].as_double_or_die();
+			}else{
+				kleur3={0,0,0};
+				ref=0;
+			}
+		}
+		figure3D newfig=figure3D(
+		figColor::Color(kleur[0],kleur[1],kleur[2]),
+		figColor::Color(kleur2[0],kleur2[1],kleur2[2]),
+		figColor::Color(kleur3[0],kleur3[1],kleur3[2]),ref);
 	newfig.addPoint(Vector3D::point(1,-1,-1));
 	newfig.addPoint(Vector3D::point(-1,1,-1));
 	newfig.addPoint(Vector3D::point(1,1,1));
@@ -209,8 +296,37 @@ figure3D Engine3D::DrawTetrahedron(const ini::Configuration &configuration,int f
 }
 figure3D Engine3D::DrawOctahedron(const ini::Configuration &configuration,int figcount){
 	std::string figure="Figure"+std::to_string(figcount);
-	std::vector<double> kleur=configuration[figure]["color"].as_double_tuple_or_die();
-	figure3D newfig=figure3D(figColor::Color(roundToInt(255*kleur[0]),roundToInt(255*kleur[1]),roundToInt(255*kleur[2])));
+	std::vector<double> kleur;
+		std::vector<double> kleur2;
+		std::vector<double> kleur3;
+		bool kleurbool=configuration[figure]["color"].as_double_tuple_if_exists(kleur);
+		double ref;
+		if(kleurbool){
+			kleur=configuration[figure]["color"].as_double_tuple_or_die();
+			kleur2={0,0,0};
+			kleur3={0,0,0};
+			ref=0;
+		}else{
+			kleur=configuration[figure]["ambientReflection"].as_double_tuple_or_die();
+			bool testbool=configuration[figure]["diffuseReflection"].as_double_tuple_if_exists(kleur2);
+			if(testbool){
+				kleur2=configuration[figure]["diffuseReflection"].as_double_tuple_or_die();
+			}else{
+				kleur2={0,0,0};
+			}
+			testbool=configuration[figure]["specularReflection"].as_double_tuple_if_exists(kleur3);
+			if(testbool){
+				kleur3=configuration[figure]["specularReflection"].as_double_tuple_or_die();
+			ref=configuration[figure]["reflectionCoefficient"].as_double_or_die();
+			}else{
+				kleur3={0,0,0};
+				ref=0;
+			}
+		}
+	figure3D newfig=figure3D(
+		figColor::Color(kleur[0],kleur[1],kleur[2]),
+		figColor::Color(kleur2[0],kleur2[1],kleur2[2]),
+		figColor::Color(kleur3[0],kleur3[1],kleur3[2]),ref);
 	newfig.addPoint(Vector3D::point(1,0,0));
 	newfig.addPoint(Vector3D::point(0,1,0));
 	newfig.addPoint(Vector3D::point(-1,0,0));
@@ -237,8 +353,37 @@ figure3D Engine3D::DrawOctahedron(const ini::Configuration &configuration,int fi
 }
 figure3D Engine3D::DrawIcosahedron(const ini::Configuration &configuration,int figcount){
 	std::string figure="Figure"+std::to_string(figcount);
-	std::vector<double> kleur=configuration[figure]["color"].as_double_tuple_or_die();
-	figure3D newfig=figure3D(figColor::Color(roundToInt(255*kleur[0]),roundToInt(255*kleur[1]),roundToInt(255*kleur[2])));
+	std::vector<double> kleur;
+		std::vector<double> kleur2;
+		std::vector<double> kleur3;
+		bool kleurbool=configuration[figure]["color"].as_double_tuple_if_exists(kleur);
+		double ref;
+		if(kleurbool){
+			kleur=configuration[figure]["color"].as_double_tuple_or_die();
+			kleur2={0,0,0};
+			kleur3={0,0,0};
+			ref=0;
+		}else{
+			kleur=configuration[figure]["ambientReflection"].as_double_tuple_or_die();
+			bool testbool=configuration[figure]["diffuseReflection"].as_double_tuple_if_exists(kleur2);
+			if(testbool){
+				kleur2=configuration[figure]["diffuseReflection"].as_double_tuple_or_die();
+			}else{
+				kleur2={0,0,0};
+			}
+			testbool=configuration[figure]["specularReflection"].as_double_tuple_if_exists(kleur3);
+			if(testbool){
+				kleur3=configuration[figure]["specularReflection"].as_double_tuple_or_die();
+			ref=configuration[figure]["reflectionCoefficient"].as_double_or_die();
+			}else{
+				kleur3={0,0,0};
+				ref=0;
+			}
+		}
+	figure3D newfig=figure3D(
+		figColor::Color(kleur[0],kleur[1],kleur[2]),
+		figColor::Color(kleur2[0],kleur2[1],kleur2[2]),
+		figColor::Color(kleur3[0],kleur3[1],kleur3[2]),ref);
 	newfig.addPoint(Vector3D::point(0,0,pow(5,0.5)/2));
 	for(int i=2;i<7;i++){
 		double x=cos((i-2)*(2*M_PI)/5);
@@ -295,8 +440,37 @@ figure3D Engine3D::DrawIcosahedron(const ini::Configuration &configuration,int f
 }
 figure3D Engine3D::DrawDodecahedron(const ini::Configuration &configuration,int figcount){
 	std::string figure="Figure"+std::to_string(figcount);
-	std::vector<double> kleur=configuration[figure]["color"].as_double_tuple_or_die();
-	figure3D newfig=figure3D(figColor::Color(roundToInt(255*kleur[0]),roundToInt(255*kleur[1]),roundToInt(255*kleur[2])));
+		std::vector<double> kleur;
+		std::vector<double> kleur2;
+		std::vector<double> kleur3;
+		bool kleurbool=configuration[figure]["color"].as_double_tuple_if_exists(kleur);
+		double ref;
+		if(kleurbool){
+			kleur=configuration[figure]["color"].as_double_tuple_or_die();
+			kleur2={0,0,0};
+			kleur3={0,0,0};
+			ref=0;
+		}else{
+			kleur=configuration[figure]["ambientReflection"].as_double_tuple_or_die();
+			bool testbool=configuration[figure]["diffuseReflection"].as_double_tuple_if_exists(kleur2);
+			if(testbool){
+				kleur2=configuration[figure]["diffuseReflection"].as_double_tuple_or_die();
+			}else{
+				kleur2={0,0,0};
+			}
+			testbool=configuration[figure]["specularReflection"].as_double_tuple_if_exists(kleur3);
+			if(testbool){
+				kleur3=configuration[figure]["specularReflection"].as_double_tuple_or_die();
+			ref=configuration[figure]["reflectionCoefficient"].as_double_or_die();
+			}else{
+				kleur3={0,0,0};
+				ref=0;
+			}
+		}
+	figure3D newfig=figure3D(
+		figColor::Color(kleur[0],kleur[1],kleur[2]),
+		figColor::Color(kleur2[0],kleur2[1],kleur2[2]),
+		figColor::Color(kleur3[0],kleur3[1],kleur3[2]),ref);
 	figure3D icosahedron=Engine3D::DrawIcosahedron(configuration,figcount);
 	for(face3D face:icosahedron.faces){
 		double x=0;
@@ -307,12 +481,12 @@ figure3D Engine3D::DrawDodecahedron(const ini::Configuration &configuration,int 
 			y+=icosahedron.points[i].y;
 			z+=icosahedron.points[i].z;
 		}
-		x/=3;
-		y/=3;
-		z/=3;
+		x/=3.0;
+		y/=3.0;
+		z/=3.0;
 		newfig.addPoint(Vector3D::point(x,y,z));
 	}
-	std::vector<int> v={0,1,2,3,4};
+	std::vector<int> v={4,3,2,1,0};
 	newfig.addFace(face3D(v));
 	v={0,5,6,7,1};
 	newfig.addFace(face3D(v));
@@ -341,10 +515,41 @@ figure3D Engine3D::DrawDodecahedron(const ini::Configuration &configuration,int 
 
 figure3D Engine3D::DrawSphere(const ini::Configuration &configuration,const int figcount){
 	std::string figure="Figure"+std::to_string(figcount);
-	std::vector<double> kleur=configuration[figure]["color"].as_double_tuple_or_die();
+	std::vector<double> kleur;
+			std::vector<double> kleur2;
+			std::vector<double> kleur3;
+			bool kleurbool=configuration[figure]["color"].as_double_tuple_if_exists(kleur);
+			double ref;
+			if(kleurbool){
+				kleur=configuration[figure]["color"].as_double_tuple_or_die();
+				kleur2={0,0,0};
+				kleur3={0,0,0};
+				ref=0;
+			}else{
+				kleur=configuration[figure]["ambientReflection"].as_double_tuple_or_die();
+				bool testbool=configuration[figure]["diffuseReflection"].as_double_tuple_if_exists(kleur2);
+				if(testbool){
+					kleur2=configuration[figure]["diffuseReflection"].as_double_tuple_or_die();
+				}else{
+					kleur2={0,0,0};
+				}
+				testbool=configuration[figure]["specularReflection"].as_double_tuple_if_exists(kleur3);
+				if(testbool){
+					kleur3=configuration[figure]["specularReflection"].as_double_tuple_or_die();
+				ref=configuration[figure]["reflectionCoefficient"].as_double_or_die();
+				}else{
+					kleur3={0,0,0};
+					ref=0;
+				}
+			}
+
 	int n=configuration[figure]["n"].as_int_or_die();
 	figure3D oldfig=Engine3D::DrawIcosahedron(configuration,figcount);
 	for(int i=0;i<n;i++){
+		figure3D newfig=figure3D(
+			figColor::Color(kleur[0],kleur[1],kleur[2]),
+			figColor::Color(kleur2[0],kleur2[1],kleur2[2]),
+			figColor::Color(kleur3[0],kleur3[1],kleur3[2]),ref);
 		std::vector<Vector3D> nieuwpoints;
 		std::vector<face3D> nieuwface;
 		std::vector<Vector3D> oldpoints=oldfig.points;
@@ -353,9 +558,9 @@ figure3D Engine3D::DrawSphere(const ini::Configuration &configuration,const int 
 			Vector3D A=oldpoints[temp.pointsIndex[0]];
 			Vector3D B=oldpoints[temp.pointsIndex[1]];
 			Vector3D C=oldpoints[temp.pointsIndex[2]];
-			Vector3D D=(A+B)/2;
-			Vector3D E=(A+C)/2;
-			Vector3D F=(B+C)/2;
+			Vector3D D=(A+B)/2.0;
+			Vector3D E=(A+C)/2.0;
+			Vector3D F=(B+C)/2.0;
 			nieuwpoints.push_back(A);
 			nieuwpoints.push_back(B);
 			nieuwpoints.push_back(C);
@@ -372,10 +577,10 @@ figure3D Engine3D::DrawSphere(const ini::Configuration &configuration,const int 
 			nieuwface.push_back(face3D(vec));
 			pointcounter+=6;
 		}
-		figure3D newfig(nieuwface,figColor::Color(roundToInt(255*kleur[0]),roundToInt(255*kleur[1]),roundToInt(255*kleur[2])));
 		for(auto p:nieuwpoints){
 			newfig.addPoint(p);
 		}
+		newfig.faces=nieuwface;
 		oldfig=newfig;
 	}
 	for(Vector3D& point:oldfig.points){
@@ -387,8 +592,37 @@ figure3D Engine3D::DrawSphere(const ini::Configuration &configuration,const int 
 
 figure3D Engine3D::DrawCone(const ini::Configuration &configuration, const int figcount){
 	std::string figure="Figure"+std::to_string(figcount);
-	std::vector<double> kleur=configuration[figure]["color"].as_double_tuple_or_die();
-	figure3D newfig=figure3D(figColor::Color(roundToInt(255*kleur[0]),roundToInt(255*kleur[1]),roundToInt(255*kleur[2])));
+	std::vector<double> kleur;
+		std::vector<double> kleur2;
+		std::vector<double> kleur3;
+		bool kleurbool=configuration[figure]["color"].as_double_tuple_if_exists(kleur);
+		double ref;
+		if(kleurbool){
+			kleur=configuration[figure]["color"].as_double_tuple_or_die();
+			kleur2={0,0,0};
+			kleur3={0,0,0};
+			ref=0;
+		}else{
+			kleur=configuration[figure]["ambientReflection"].as_double_tuple_or_die();
+			bool testbool=configuration[figure]["diffuseReflection"].as_double_tuple_if_exists(kleur2);
+			if(testbool){
+				kleur2=configuration[figure]["diffuseReflection"].as_double_tuple_or_die();
+			}else{
+				kleur2={0,0,0};
+			}
+			testbool=configuration[figure]["specularReflection"].as_double_tuple_if_exists(kleur3);
+			if(testbool){
+				kleur3=configuration[figure]["specularReflection"].as_double_tuple_or_die();
+			ref=configuration[figure]["reflectionCoefficient"].as_double_or_die();
+			}else{
+				kleur3={0,0,0};
+				ref=0;
+			}
+		}
+	figure3D newfig=figure3D(
+		figColor::Color(kleur[0],kleur[1],kleur[2]),
+		figColor::Color(kleur2[0],kleur2[1],kleur2[2]),
+		figColor::Color(kleur3[0],kleur3[1],kleur3[2]),ref);
 	int n=configuration[figure]["n"].as_int_or_die();
 	double height=configuration[figure]["height"].as_double_or_die();
 	for(int i=1;i<n+1;i++){
@@ -409,8 +643,37 @@ figure3D Engine3D::DrawCone(const ini::Configuration &configuration, const int f
 
 figure3D Engine3D::DrawCylinder(const ini::Configuration &configuration, const int figcount){
 	std::string figure="Figure"+std::to_string(figcount);
-	std::vector<double> kleur=configuration[figure]["color"].as_double_tuple_or_die();
-	figure3D newfig=figure3D(figColor::Color(roundToInt(255*kleur[0]),roundToInt(255*kleur[1]),roundToInt(255*kleur[2])));
+	std::vector<double> kleur;
+		std::vector<double> kleur2;
+		std::vector<double> kleur3;
+		bool kleurbool=configuration[figure]["color"].as_double_tuple_if_exists(kleur);
+		double ref;
+		if(kleurbool){
+			kleur=configuration[figure]["color"].as_double_tuple_or_die();
+			kleur2={0,0,0};
+			kleur3={0,0,0};
+			ref=0;
+		}else{
+			kleur=configuration[figure]["ambientReflection"].as_double_tuple_or_die();
+			bool testbool=configuration[figure]["diffuseReflection"].as_double_tuple_if_exists(kleur2);
+			if(testbool){
+				kleur2=configuration[figure]["diffuseReflection"].as_double_tuple_or_die();
+			}else{
+				kleur2={0,0,0};
+			}
+			testbool=configuration[figure]["specularReflection"].as_double_tuple_if_exists(kleur3);
+			if(testbool){
+				kleur3=configuration[figure]["specularReflection"].as_double_tuple_or_die();
+			ref=configuration[figure]["reflectionCoefficient"].as_double_or_die();
+			}else{
+				kleur3={0,0,0};
+				ref=0;
+			}
+		}
+	figure3D newfig=figure3D(
+		figColor::Color(kleur[0],kleur[1],kleur[2]),
+		figColor::Color(kleur2[0],kleur2[1],kleur2[2]),
+		figColor::Color(kleur3[0],kleur3[1],kleur3[2]),ref);
 	int n=configuration[figure]["n"].as_int_or_die();
 	double height=configuration[figure]["height"].as_double_or_die();
 	for(int i=1;i<n+1;i++){
@@ -438,8 +701,37 @@ figure3D Engine3D::DrawCylinder(const ini::Configuration &configuration, const i
 
 figure3D Engine3D::DrawTorus(const ini::Configuration &configuration, const int figcount){
 	std::string figure="Figure"+std::to_string(figcount);
-	std::vector<double> kleur=configuration[figure]["color"].as_double_tuple_or_die();
-	figure3D newfig=figure3D(figColor::Color(roundToInt(255*kleur[0]),roundToInt(255*kleur[1]),roundToInt(255*kleur[2])));
+	std::vector<double> kleur;
+		std::vector<double> kleur2;
+		std::vector<double> kleur3;
+		bool kleurbool=configuration[figure]["color"].as_double_tuple_if_exists(kleur);
+		double ref;
+		if(kleurbool){
+			kleur=configuration[figure]["color"].as_double_tuple_or_die();
+			kleur2={0,0,0};
+			kleur3={0,0,0};
+			ref=0;
+		}else{
+			kleur=configuration[figure]["ambientReflection"].as_double_tuple_or_die();
+			bool testbool=configuration[figure]["diffuseReflection"].as_double_tuple_if_exists(kleur2);
+			if(testbool){
+				kleur2=configuration[figure]["diffuseReflection"].as_double_tuple_or_die();
+			}else{
+				kleur2={0,0,0};
+			}
+			testbool=configuration[figure]["specularReflection"].as_double_tuple_if_exists(kleur3);
+			if(testbool){
+				kleur3=configuration[figure]["specularReflection"].as_double_tuple_or_die();
+			ref=configuration[figure]["reflectionCoefficient"].as_double_or_die();
+			}else{
+				kleur3={0,0,0};
+				ref=0;
+			}
+		}
+	figure3D newfig=figure3D(
+			figColor::Color(kleur[0],kleur[1],kleur[2]),
+			figColor::Color(kleur2[0],kleur2[1],kleur2[2]),
+			figColor::Color(kleur3[0],kleur3[1],kleur3[2]),ref);
 	double r=configuration[figure]["r"].as_double_or_die();
 	double R=configuration[figure]["R"].as_double_or_die();
 	int m=configuration[figure]["m"].as_int_or_die();
@@ -502,7 +794,7 @@ Matrix Engine3D::eyePointTrans(const Vector3D &eyepoint){
 }
 
 figure3D Engine3D::combineFigures(std::vector<figure3D> figures){
-	figure3D newfig=figure3D(figures[0].color);
+	figure3D newfig=figure3D(figures[0].ambientReflection);
 	int pointcount=0;
 	for(figure3D fig:figures){
 		for(auto i:fig.points){
@@ -522,12 +814,41 @@ figure3D Engine3D::combineFigures(std::vector<figure3D> figures){
 
 figure3D Engine3D::DrawBuckyBall(const ini::Configuration &configuration, const int figcount){
 	std::string figure="Figure"+std::to_string(figcount);
-	std::vector<double> kleur=configuration[figure]["color"].as_double_tuple_or_die();
+	std::vector<double> kleur;
+		std::vector<double> kleur2;
+		std::vector<double> kleur3;
+		bool kleurbool=configuration[figure]["color"].as_double_tuple_if_exists(kleur);
+		double ref;
+		if(kleurbool){
+			kleur=configuration[figure]["color"].as_double_tuple_or_die();
+			kleur2={0,0,0};
+			kleur3={0,0,0};
+			ref=0;
+		}else{
+			kleur=configuration[figure]["ambientReflection"].as_double_tuple_or_die();
+			bool testbool=configuration[figure]["diffuseReflection"].as_double_tuple_if_exists(kleur2);
+			if(testbool){
+				kleur2=configuration[figure]["diffuseReflection"].as_double_tuple_or_die();
+			}else{
+				kleur2={0,0,0};
+			}
+			testbool=configuration[figure]["specularReflection"].as_double_tuple_if_exists(kleur3);
+			if(testbool){
+				kleur3=configuration[figure]["specularReflection"].as_double_tuple_or_die();
+			ref=configuration[figure]["reflectionCoefficient"].as_double_or_die();
+			}else{
+				kleur3={0,0,0};
+				ref=0;
+			}
+		}
 	figure3D icosahedron=Engine3D::DrawIcosahedron(configuration,figcount);
 	std::vector<face3D> triangles;
 	std::vector<face3D> hexagons;
 	int pointcounter=0;
-	figure3D bucky(figColor::Color(roundToInt(255*kleur[0]),roundToInt(255*kleur[1]),roundToInt(255*kleur[2])));
+	figure3D bucky(
+			figColor::Color(kleur[0],kleur[1],kleur[2]),
+			figColor::Color(kleur2[0],kleur2[1],kleur2[2]),
+			figColor::Color(kleur3[0],kleur3[1],kleur3[2]),ref);
 	for(face3D face:icosahedron.faces){
 		for(unsigned int i=0;i<face.pointsIndex.size();i++){
 			bucky.addPoint(icosahedron.points[face.pointsIndex[i]]);
@@ -635,6 +956,7 @@ figure3D Engine3D::DrawBuckyBall(const ini::Configuration &configuration, const 
 					}
 				}
 			}
+			std::reverse(newerface.pointsIndex.begin(),newerface.pointsIndex.end());
 			bucky.addFace(newerface);
 		}
 			for(int i:samepoints){
@@ -660,7 +982,7 @@ figure3D Engine3D::DrawBuckyBall(const ini::Configuration &configuration, const 
 			}
 		}
 	}
-	for(unsigned int i=0;i<bucky.points.size();i++){
+	for(int i=0;i<bucky.points.size();i++){
 		bool used=false;
 		for(int b:usedpoints){
 			if(i==b){
@@ -686,4 +1008,46 @@ figure3D Engine3D::DrawBuckyBall(const ini::Configuration &configuration, const 
 	}
 	return bucky;
 }
+
+std::vector<Light*> Engine3D::readLights(const ini::Configuration &configuration){
+	unsigned int nrLights=configuration["General"]["nrLights"].as_int_or_die();
+	std::vector<Light*> lights;
+	std::vector<double> eyeCoords=configuration["General"]["eye"].as_double_tuple_or_die();
+	Vector3D eyeVector=Vector3D::vector(eyeCoords[0],eyeCoords[1],eyeCoords[2]);
+	Matrix eyeMatrix=Engine3D::eyePointTrans(eyeVector);
+	for(unsigned int i=0;i<nrLights;i++){
+		bool infinity;
+		std::string light="Light"+std::to_string(i);
+		bool exists=configuration[light]["infinity"].as_bool_if_exists(infinity);
+		std::vector<double> ambientvec=configuration[light]["ambientLight"].as_double_tuple_or_die();
+		figColor::Color ambient(ambientvec[0],ambientvec[1],ambientvec[2]);
+		figColor::Color diffuse(0,0,0);
+		figColor::Color specular(0,0,0);
+		if(exists){
+
+			std::vector<double> diffusevec=configuration[light]["diffuseLight"].as_double_tuple_or_die();
+			diffuse=figColor::Color(diffusevec[0],diffusevec[1],diffusevec[2]);
+			if(infinity){
+				std::vector<double> locationd=configuration[light]["direction"].as_double_tuple_or_die();
+				Vector3D loc=Vector3D::vector(Vector3D::vector(locationd[0],locationd[1],locationd[2]));
+				loc=loc*eyeMatrix;
+				Light *l=new InfLight(ambient,diffuse,specular,loc);
+				lights.push_back(l);
+			}else{
+				std::vector<double> locationd=configuration[light]["location"].as_double_tuple_or_die();
+				Vector3D loc=Vector3D::point(Vector3D::vector(locationd[0],locationd[1],locationd[2]));
+				loc=loc*eyeMatrix;
+				Light *l=new PointLight(ambient,diffuse,specular,loc);
+				lights.push_back(l);
+			}
+		}else{
+			Light* l=new Light(ambient,diffuse,specular);
+			lights.push_back(l);
+		}
+
+
+	}
+	return lights;
+}
+
 

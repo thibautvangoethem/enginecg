@@ -10,6 +10,7 @@
 #include "Line2D.h"
 #include "figure3D.h"
 #include "ZBuffer.h"
+#include "Light.h"
 
 #include <list>
 
@@ -30,8 +31,14 @@ public:
 	static void draw_zbuf_line(ZBuffer & ZBuf, img::EasyImage & img, unsigned int x0, unsigned int y0,double z0,
 				unsigned int x1, unsigned int y1,double z1,const img::Color &color);
 	static double calculateZFactor(double za,double zb,double i,double a);
-	static EasyImage TrianglesToImg(const ini::Configuration &configuration,std::vector<figure3D>& figures,bool WithZBuf=false);
-	static void draw_zbuf_triag(ZBuffer& buf, img::EasyImage& image,Vector3D const& A, Vector3D const& B, Vector3D const& C,double d, double dx, double dy, Color color);
+	static EasyImage TrianglesToImg(const ini::Configuration &configuration,std::vector<figure3D>& figures,bool WithZBuf,std::vector<Light*>& Lights);
+	static void draw_zbuf_triag(ZBuffer& buf, img::EasyImage& image,
+			Vector3D const& A, Vector3D const& B, Vector3D const& C,
+			double d, double dx, double dy,
+			figColor::Color ambientReflection,
+			figColor::Color diffuseReflection,
+			figColor::Color specularReflection, double reflectionCoeff,
+			std::vector<Light*>& lights);
 private:
 	static bool isTriangle(figure3D fig);
 };

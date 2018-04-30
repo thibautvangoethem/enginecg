@@ -28,6 +28,7 @@
 #include <list>
 #include <utility>
 #include <limits>
+#include "Light.h"
 #include "imgUtils.h"
 using namespace img;
 typedef std::list<Line2D> Lines2D;
@@ -97,71 +98,71 @@ EasyImage imgUtils::LinesToImg(const ini::Configuration &configuration,Lines2D& 
 
 void imgUtils::moveToPos(Lines2D& lines,double& xmin,double& ymin,double& xmax,double& ymax){
 
-		for(Line2D i:lines){
-			if(i.p1.x>xmax){
-				xmax=i.p1.x;
-			}
-			if(i.p1.x<xmin){
-				xmin=i.p1.x;
-			}
-			if(i.p1.y>ymax){
-				ymax=i.p1.y;
-			}
-			if(i.p1.y<ymin){
-				ymin=i.p1.y;
-			}
-			if(i.p2.x>xmax){
-				xmax=i.p2.x;
-			}
-			if(i.p2.x<xmin){
-				xmin=i.p2.x;
-			}
-			if(i.p2.y>ymax){
-				ymax=i.p2.y;
-			}
-			if(i.p2.y<ymin){
-				ymin=i.p2.y;
-			}
+	for(Line2D i:lines){
+		if(i.p1.x>xmax){
+			xmax=i.p1.x;
 		}
-		if(xmin<0||ymin<0){
-			Lines2D nieuwLines;
-			if(xmin<0&&ymin>=0){
-				for(Line2D& line:lines){
-					double tempx1=line.p1.x-xmin;
-					double tempx2=line.p2.x-xmin;
-					line.setp1(tempx1,line.p1.y);
-					line.setp2(tempx2,line.p2.y);
-					continue;
-							}
-				xmax-=xmin;
-				xmin=0;
-			}else if(ymin<0&&xmin>=0){
-				for(Line2D& line:lines){
-					double tempy1=line.p1.y-ymin;
-					double tempy2=line.p2.y-ymin;
-					line.setp1(line.p1.x,tempy1);
-					line.setp2(line.p2.x,tempy2);
-					continue;
-				}
-				ymax-=ymin;
-				ymin=0;
-			}else if(ymin<0&&xmin<0){
-				for(Line2D& line:lines){
-					double tempy1=line.p1.y-ymin;
-					double tempy2=line.p2.y-ymin;
-					double tempx1=line.p1.x-xmin;
-					double tempx2=line.p2.x-xmin;
-					line.setp1(tempx1,tempy1);
-					line.setp2(tempx2,tempy2);
-					continue;
-				}
-				xmax-=xmin;
-				ymax-=ymin;
-				ymin=0.0;
-				xmin=0.0;
+		if(i.p1.x<xmin){
+			xmin=i.p1.x;
+		}
+		if(i.p1.y>ymax){
+			ymax=i.p1.y;
+		}
+		if(i.p1.y<ymin){
+			ymin=i.p1.y;
+		}
+		if(i.p2.x>xmax){
+			xmax=i.p2.x;
+		}
+		if(i.p2.x<xmin){
+			xmin=i.p2.x;
+		}
+		if(i.p2.y>ymax){
+			ymax=i.p2.y;
+		}
+		if(i.p2.y<ymin){
+			ymin=i.p2.y;
+		}
+	}
+	if(xmin<0||ymin<0){
+		Lines2D nieuwLines;
+		if(xmin<0&&ymin>=0){
+			for(Line2D& line:lines){
+				double tempx1=line.p1.x-xmin;
+				double tempx2=line.p2.x-xmin;
+				line.setp1(tempx1,line.p1.y);
+				line.setp2(tempx2,line.p2.y);
+				continue;
+						}
+			xmax-=xmin;
+			xmin=0.0;
+		}else if(ymin<0&&xmin>=0){
+			for(Line2D& line:lines){
+				double tempy1=line.p1.y-ymin;
+				double tempy2=line.p2.y-ymin;
+				line.setp1(line.p1.x,tempy1);
+				line.setp2(line.p2.x,tempy2);
+				continue;
 			}
+			ymax-=ymin;
+			ymin=0.0;
+		}else if(ymin<0&&xmin<0){
+			for(Line2D& line:lines){
+				double tempy1=line.p1.y-ymin;
+				double tempy2=line.p2.y-ymin;
+				double tempx1=line.p1.x-xmin;
+				double tempx2=line.p2.x-xmin;
+				line.setp1(tempx1,tempy1);
+				line.setp2(tempx2,tempy2);
+				continue;
+			}
+			xmax-=xmin;
+			ymax-=ymin;
+			ymin=0.0;
+			xmin=0.0;
+		}
 
-		}
+	}
 }
 
 
@@ -181,16 +182,22 @@ Lines2D imgUtils::figuresToLines2D(std::vector<figure3D> &figures,bool WithZBuff
 			for(unsigned int i=0;i<face.pointsIndex.size();i++){
 				if(WithZBuffer){
 					if(i==face.pointsIndex.size()-1){
-						lines.push_back(Line2D(projectedPoints[face.pointsIndex[i]],projectedPoints[face.pointsIndex[0]],fig.color,ZBufferVec[face.pointsIndex[i]],ZBufferVec[face.pointsIndex[0]]));
+						lines.push_back(Line2D(projectedPoints[face.pointsIndex[i]],projectedPoints[face.pointsIndex[0]],
+						figColor::Color(roundToInt(fig.ambientReflection.red*255),roundToInt(fig.ambientReflection.green*255),roundToInt(fig.ambientReflection.blue*255))
+						,ZBufferVec[face.pointsIndex[i]],ZBufferVec[face.pointsIndex[0]]));
 					}else{
-						lines.push_back(Line2D(projectedPoints[face.pointsIndex[i]],projectedPoints[face.pointsIndex[i+1]],fig.color,ZBufferVec[face.pointsIndex[i]],ZBufferVec[face.pointsIndex[i+1]]));
+						lines.push_back(Line2D(projectedPoints[face.pointsIndex[i]],projectedPoints[face.pointsIndex[i+1]],
+						figColor::Color(roundToInt(fig.ambientReflection.red*255),roundToInt(fig.ambientReflection.green*255),roundToInt(fig.ambientReflection.blue*255)),
+						ZBufferVec[face.pointsIndex[i]],ZBufferVec[face.pointsIndex[i+1]]));
 					}
 
 				}else{
 					if(i==face.pointsIndex.size()-1){
-						lines.push_back(Line2D(projectedPoints[face.pointsIndex[i]],projectedPoints[face.pointsIndex[0]],fig.color));
+						lines.push_back(Line2D(projectedPoints[face.pointsIndex[i]],projectedPoints[face.pointsIndex[0]],
+						figColor::Color(roundToInt(fig.ambientReflection.red*255),roundToInt(fig.ambientReflection.green*255),roundToInt(fig.ambientReflection.blue*255))));
 					}else{
-						lines.push_back(Line2D(projectedPoints[face.pointsIndex[i]],projectedPoints[face.pointsIndex[i+1]],fig.color));
+						lines.push_back(Line2D(projectedPoints[face.pointsIndex[i]],projectedPoints[face.pointsIndex[i+1]],
+						figColor::Color(roundToInt(fig.ambientReflection.red*255),roundToInt(fig.ambientReflection.green*255),roundToInt(fig.ambientReflection.blue*255))));
 					}
 				}
 			}
@@ -204,8 +211,8 @@ Point2D imgUtils::projectPoint(const Vector3D &point,const double d){
 	double x;
 	double y;
 	if(point.z==0){
-		x= d*point.x/-1;
-		y= d*point.y/-1;
+		x= d*point.x/-1.0;
+		y= d*point.y/-1.0;
 	}else{
 		x= d*point.x/-point.z;
 		y= d*point.y/-point.z;
@@ -301,11 +308,11 @@ void imgUtils::draw_zbuf_line(ZBuffer & ZBuf, img::EasyImage & img,unsigned int 
 
 double imgUtils::calculateZFactor(double za,double zb,double i,double a){
 //	std::cout<<za<<"factor"<<zb<<std::endl;
-	double p=((1-(i/a))/za)+i/a/zb;
+	double p=((1.0-(i/a))/za)+i/a/zb;
 	return p;
 }
 
-EasyImage imgUtils::TrianglesToImg(const ini::Configuration &configuration,std::vector<figure3D>& figures,bool WithZBuf){
+EasyImage imgUtils::TrianglesToImg(const ini::Configuration &configuration,std::vector<figure3D>& figures,bool WithZBuf,std::vector<Light*>& Lights){
 	Lines2D projectedImg=imgUtils::figuresToLines2D(figures,WithZBuf);
 	double size=configuration["General"]["size"].as_double_or_die();
 	double xmax=std::numeric_limits<double>::min();
@@ -343,8 +350,8 @@ EasyImage imgUtils::TrianglesToImg(const ini::Configuration &configuration,std::
 	double imagex=size*(xrange/std::max(xrange,yrange));
 	double imagey=size*(yrange/std::max(xrange,yrange));
 	double d=0.95*(imagex/xrange);
-	double DCx=d*(xmin+xmax)/2;
-	double DCy=d*(ymin+ymax)/2;
+	double DCx=d*(xmin+xmax)/2.0;
+	double DCy=d*(ymin+ymax)/2.0;
 	double dx=(imagex/2)-DCx;
 	double dy=(imagey/2)-DCy;
 	std::vector<double> achtergrond=configuration["General"]["backgroundcolor"].as_double_tuple_or_die();
@@ -358,20 +365,25 @@ EasyImage imgUtils::TrianglesToImg(const ini::Configuration &configuration,std::
 			std::vector<Vector3D> points=driehoek.points;
 			for(face3D driehoekFace:driehoek.faces){
 				std::vector<int> index=driehoekFace.pointsIndex;
-				imgUtils::draw_zbuf_triag(zbuf,image,points[index[0]],points[index[1]],points[index[2]],d,dx,dy,img::Color(driehoek.color.red,driehoek.color.green,driehoek.color.blue));
+				imgUtils::draw_zbuf_triag(zbuf,image,points[index[0]],points[index[1]],points[index[2]],d,dx,dy,
+						driehoek.ambientReflection,driehoek.difusseReflection,driehoek.specularReflection,driehoek.reflectionCoefficient,Lights);
 			}
 		}
 	}
 	return image;
 }
 
-void imgUtils::draw_zbuf_triag(ZBuffer& buf, img::EasyImage& image,Vector3D const& A, Vector3D const& B, Vector3D const& C,double d, double dx, double dy, Color color){
+void imgUtils::draw_zbuf_triag(ZBuffer& buf, img::EasyImage& image,
+		Vector3D const& A, Vector3D const& B, Vector3D const& C,
+		double d, double dx, double dy,
+		figColor::Color ambientReflection,
+		figColor::Color diffuseReflection,
+		figColor::Color specularReflection, double reflectionCoeff,
+		std::vector<Light*>& lights){
+
 	Point2D A2=Point2D((d*A.x/(-A.z))+dx,(d*A.y/(-A.z))+dy);
 	Point2D B2=Point2D((d*B.x/(-B.z))+dx,(d*B.y/(-B.z))+dy);
 	Point2D C2=Point2D((d*C.x/(-C.z))+dx,(d*C.y/(-C.z))+dy);
-//	imgUtils::draw_zbuf_line(buf,image,roundToInt(A2.x),roundToInt(A2.y),A.z,roundToInt(B2.x),roundToInt(B2.y),B.z,color);
-//	imgUtils::draw_zbuf_line(buf,image,roundToInt(C2.x),roundToInt(C2.y),C.z,roundToInt(B2.x),roundToInt(B2.y),B.z,color);
-//	imgUtils::draw_zbuf_line(buf,image,roundToInt(C2.x),roundToInt(C2.y),C.z,roundToInt(A2.x),roundToInt(A2.y),A.z,color);
 	double xg=(A2.x+B2.x+C2.x)/3;
 	double yg=(A2.y+B2.y+C2.y)/3;
 	double zg=(A.z+B.z+C.z)/3;
@@ -380,9 +392,50 @@ void imgUtils::draw_zbuf_triag(ZBuffer& buf, img::EasyImage& image,Vector3D cons
 	double w1=(u.y*v.z)-(u.z*v.y);
 	double w2=(u.z*v.x)-(u.x*v.z);
 	double w3=(u.x*v.y)-(u.y*v.x);
-//	Vector3D w=Vector3D::vector(w1,w2,w3);
+	Vector3D n=Vector3D::vector(w1,w2,w3);
+	n.normalise();
 	double k=w1*A.x+w2*A.y+w3*A.z;
+
+	//zoek de lichten die per pixel berekent moeten worden
+	std::vector<Light*> pixelLights;
+	for(auto i:lights){
+		if(i->diffuseLight!=figColor::Color(0,0,0)){
+			if(!i->getSourceVector().is_vector()){
+				pixelLights.push_back(i);
+			}
+		}
+	}
+
 	if(k!=0){
+
+		//bereken kleuren die op heel het vlak werken
+			double redd=0;
+			double greend=0;
+			double blued=0;
+		//	std::cout<<diffuseReflection.red<<" "<<diffuseReflection.green<<" "<<diffuseReflection.blue<<std::endl;
+			for(auto i:lights){
+				redd+=i->ambientLight.red*ambientReflection.red;
+				greend+=i->ambientLight.green*ambientReflection.green;
+				blued+=i->ambientLight.blue*ambientReflection.blue;
+				if(i->diffuseLight!=figColor::Color(0,0,0)){
+					Vector3D ld=i->getSourceVector();
+					if(ld.is_vector()){
+						Vector3D l=-ld;
+						l.normalise();
+						double cosAlpha=(n.x*l.x)+(n.y*l.y)+(n.z*l.z);
+		//				std::cout<<cosAlpha<<std::endl;
+						if(cosAlpha>0){
+							redd+=i->diffuseLight.red*diffuseReflection.red*cosAlpha;
+							greend+=i->diffuseLight.green*diffuseReflection.green*cosAlpha;
+							blued+=i->diffuseLight.blue*diffuseReflection.blue*cosAlpha;
+						}
+					}
+				}
+			}
+//			int red=roundToInt(redd*255);
+//			int green=roundToInt(greend*255);
+//			int blue=roundToInt(blued*255);
+
 		double dzdx=w1/((-d)*k);
 		double dzdy=w2/((-d)*k);
 		for(double i=roundToInt(std::min(A2.y,std::min(B2.y,C2.y))+0.5);i<=roundToInt(std::max(A2.y,std::max(B2.y,C2.y))-0.5);i++){
@@ -419,10 +472,35 @@ void imgUtils::draw_zbuf_triag(ZBuffer& buf, img::EasyImage& image,Vector3D cons
 			for(int pix=xl;pix<=xr;pix++){
 				double z=1.0001*(1/zg)+(pix-xg)*dzdx+(i-yg)*dzdy;
 				if(buf.zBuffer[pix][i]>z){
-				buf.zBuffer[pix][i]=z;
-				image(pix, i) = color;
-				}
+					buf.zBuffer[pix][i]=z;
+					for(auto light:pixelLights){
+						Vector3D ld=light->getSourceVector();
+						Vector3D point=Vector3D::point((pix*-(1/z))/d,(i*-(1/z))/d,1/z);
+						Vector3D l=ld-point;
+						l.normalise();
+						double cosAlpha=(n.x*l.x)+(n.y*l.y)+(n.z*l.z);
+		//				std::cout<<cosAlpha<<std::endl;
+						if(cosAlpha>0){
+							redd+=light->diffuseLight.red*diffuseReflection.red*cosAlpha;
+							greend+=light->diffuseLight.green*diffuseReflection.green*cosAlpha;
+							blued+=light->diffuseLight.blue*diffuseReflection.blue*cosAlpha;
+						}
+					}
+					if(redd>1){
+						redd=1;
+					}
+					if(greend>1){
+						greend=1;
+					}
+					if(blued>1){
+						blued=1;
+					}
 
+					int red=roundToInt(redd*255);
+					int green=roundToInt(greend*255);
+					int blue=roundToInt(blued*255);
+					image(pix, i) = Color(red,green,blue);
+				}
 			}
 		}
 	}

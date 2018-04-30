@@ -14,6 +14,8 @@ namespace figColor{
 	class Color {
 	public:
 		Color(double r,double g,double b): red(r),green(g),blue(b){};
+		bool operator ==(const Color &b) const;
+		bool operator !=(const Color &b) const;
 		virtual ~Color(){}
 		double red;
 		double green;

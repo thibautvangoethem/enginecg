@@ -14,6 +14,7 @@
 #include "Color.h"
 #include "vector3d.h"
 #include "ini_configuration.h"
+#include "Light.h"
 #include <vector>
 #include <list>
 #include <cmath>
@@ -39,9 +40,10 @@ public:
 	static figure3D DrawBuckyBall(const ini::Configuration &configuration, const int figcount);
 	static void applyTransformation(figure3D &fig, const Matrix &mat);
 	static void applyAllTransformation(std::vector<figure3D> &figs, const Matrix &mat);
-	Matrix eyePointTrans(const Vector3D &eyepoint);
+	static Matrix eyePointTrans(const Vector3D &eyepoint);
 	double toRadian(double angle);
 	static figure3D combineFigures(std::vector<figure3D> figures);
+	static std::vector<Light*> readLights(const ini::Configuration &configuration);
 };
 
 
