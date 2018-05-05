@@ -17,6 +17,7 @@
 #include "simpleGenerations.h"
 #include "ZBuffer.h"
 
+#include <tgmath.h>
 #include <cstdlib>
 #include <random>
 #include <fstream>
@@ -308,8 +309,8 @@ void imgUtils::draw_zbuf_line(ZBuffer & ZBuf, img::EasyImage & img,unsigned int 
 
 double imgUtils::calculateZFactor(double za,double zb,double i,double a){
 //	std::cout<<za<<"factor"<<zb<<std::endl;
-	double p=((1.0-(i/a))/za)+i/a/zb;
-	return p;
+	double z=((1.0-(i/a))/za)+i/a/zb;
+	return z;
 }
 
 EasyImage imgUtils::TrianglesToImg(const ini::Configuration &configuration,std::vector<figure3D>& figures,bool WithZBuf,std::vector<Light*>& Lights){
@@ -352,8 +353,8 @@ EasyImage imgUtils::TrianglesToImg(const ini::Configuration &configuration,std::
 	double d=0.95*(imagex/xrange);
 	double DCx=d*(xmin+xmax)/2.0;
 	double DCy=d*(ymin+ymax)/2.0;
-	double dx=(imagex/2)-DCx;
-	double dy=(imagey/2)-DCy;
+	double dx=(imagex/2.0)-DCx;
+	double dy=(imagey/2.0)-DCy;
 	std::vector<double> achtergrond=configuration["General"]["backgroundcolor"].as_double_tuple_or_die();
 	img::EasyImage image(roundToInt(imagex),roundToInt(imagey),Color(roundToInt(achtergrond[0]*255),roundToInt(achtergrond[1]*255),roundToInt(achtergrond[2]*255)));
 	ZBuffer zbuf;
@@ -384,9 +385,9 @@ void imgUtils::draw_zbuf_triag(ZBuffer& buf, img::EasyImage& image,
 	Point2D A2=Point2D((d*A.x/(-A.z))+dx,(d*A.y/(-A.z))+dy);
 	Point2D B2=Point2D((d*B.x/(-B.z))+dx,(d*B.y/(-B.z))+dy);
 	Point2D C2=Point2D((d*C.x/(-C.z))+dx,(d*C.y/(-C.z))+dy);
-	double xg=(A2.x+B2.x+C2.x)/3;
-	double yg=(A2.y+B2.y+C2.y)/3;
-	double zg=(A.z+B.z+C.z)/3;
+	double xg=(A2.x+B2.x+C2.x)/3.0;
+	double yg=(A2.y+B2.y+C2.y)/3.0;
+	double zg=(A.z+B.z+C.z)/3.0;
 	Vector3D u=B-A;
 	Vector3D v=C-A;
 	double w1=(u.y*v.z)-(u.z*v.y);
@@ -398,13 +399,6 @@ void imgUtils::draw_zbuf_triag(ZBuffer& buf, img::EasyImage& image,
 
 	//zoek de lichten die per pixel berekent moeten worden
 	std::vector<Light*> pixelLights;
-	for(auto i:lights){
-		if(i->diffuseLight!=figColor::Color(0,0,0)){
-			if(!i->getSourceVector().is_vector()){
-				pixelLights.push_back(i);
-			}
-		}
-	}
 
 	if(k!=0){
 
@@ -412,7 +406,6 @@ void imgUtils::draw_zbuf_triag(ZBuffer& buf, img::EasyImage& image,
 			double redd=0;
 			double greend=0;
 			double blued=0;
-		//	std::cout<<diffuseReflection.red<<" "<<diffuseReflection.green<<" "<<diffuseReflection.blue<<std::endl;
 			for(auto i:lights){
 				redd+=i->ambientLight.red*ambientReflection.red;
 				greend+=i->ambientLight.green*ambientReflection.green;
@@ -423,7 +416,6 @@ void imgUtils::draw_zbuf_triag(ZBuffer& buf, img::EasyImage& image,
 						Vector3D l=-ld;
 						l.normalise();
 						double cosAlpha=(n.x*l.x)+(n.y*l.y)+(n.z*l.z);
-		//				std::cout<<cosAlpha<<std::endl;
 						if(cosAlpha>0){
 							redd+=i->diffuseLight.red*diffuseReflection.red*cosAlpha;
 							greend+=i->diffuseLight.green*diffuseReflection.green*cosAlpha;
@@ -432,9 +424,6 @@ void imgUtils::draw_zbuf_triag(ZBuffer& buf, img::EasyImage& image,
 					}
 				}
 			}
-//			int red=roundToInt(redd*255);
-//			int green=roundToInt(greend*255);
-//			int blue=roundToInt(blued*255);
 
 		double dzdx=w1/((-d)*k);
 		double dzdy=w2/((-d)*k);
@@ -470,35 +459,47 @@ void imgUtils::draw_zbuf_triag(ZBuffer& buf, img::EasyImage& image,
 			double xl=round(std::min(xlab,std::min(xlac,xlbc))+0.5);
 			double xr=round(std::max(xrab,std::max(xrac,xrbc))-0.5);
 			for(int pix=xl;pix<=xr;pix++){
+				double redp=redd;
+				double greenp=greend;
+				double bluep=blued;
 				double z=1.0001*(1/zg)+(pix-xg)*dzdx+(i-yg)*dzdy;
 				if(buf.zBuffer[pix][i]>z){
 					buf.zBuffer[pix][i]=z;
-					for(auto light:pixelLights){
+					for(auto light:lights){
 						Vector3D ld=light->getSourceVector();
-						Vector3D point=Vector3D::point((pix*-(1/z))/d,(i*-(1/z))/d,1/z);
-						Vector3D l=ld-point;
+						Vector3D point=Vector3D::point(((pix-dx)*-(1/z))/d,((i-dy)*-(1/z))/d,1/z);
+						Vector3D l=(ld.is_point())?ld-point:-ld;
 						l.normalise();
-						double cosAlpha=(n.x*l.x)+(n.y*l.y)+(n.z*l.z);
+						double cosAlpha=n.dot(l);
 		//				std::cout<<cosAlpha<<std::endl;
-						if(cosAlpha>0){
-							redd+=light->diffuseLight.red*diffuseReflection.red*cosAlpha;
-							greend+=light->diffuseLight.green*diffuseReflection.green*cosAlpha;
-							blued+=light->diffuseLight.blue*diffuseReflection.blue*cosAlpha;
+						if(cosAlpha>0&&ld.is_point()){
+							redp+=light->diffuseLight.red*diffuseReflection.red*cosAlpha;
+							greenp+=light->diffuseLight.green*diffuseReflection.green*cosAlpha;
+							bluep+=light->diffuseLight.blue*diffuseReflection.blue*cosAlpha;
 						}
+						Vector3D r=(2*cosAlpha*n)-l;
+						r.normalise();
+						Vector3D toEye=-point;
+						toEye.normalise();
+						double cosBeta=r.dot(toEye);
+						if(cosBeta>=0&&cosAlpha>0){
+							redp+= light->specularLight.red*specularReflection.red*pow(cosBeta,reflectionCoeff);
+							greenp+= light->specularLight.green*specularReflection.green*pow(cosBeta,reflectionCoeff);
+							bluep+= light->specularLight.blue*specularReflection.blue*pow(cosBeta,reflectionCoeff);
+						}
+						}
+					if(redp>1){
+						redp=1;
 					}
-					if(redd>1){
-						redd=1;
+					if(greenp>1){
+						greenp=1;
 					}
-					if(greend>1){
-						greend=1;
+					if(bluep>1){
+						bluep=1;
 					}
-					if(blued>1){
-						blued=1;
-					}
-
-					int red=roundToInt(redd*255);
-					int green=roundToInt(greend*255);
-					int blue=roundToInt(blued*255);
+					int red=roundToInt(redp*255);
+					int green=roundToInt(greenp*255);
+					int blue=roundToInt(bluep*255);
 					image(pix, i) = Color(red,green,blue);
 				}
 			}

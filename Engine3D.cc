@@ -486,7 +486,7 @@ figure3D Engine3D::DrawDodecahedron(const ini::Configuration &configuration,int 
 		z/=3.0;
 		newfig.addPoint(Vector3D::point(x,y,z));
 	}
-	std::vector<int> v={4,3,2,1,0};
+	std::vector<int> v={0,1,2,3,4};
 	newfig.addFace(face3D(v));
 	v={0,5,6,7,1};
 	newfig.addFace(face3D(v));
@@ -677,8 +677,8 @@ figure3D Engine3D::DrawCylinder(const ini::Configuration &configuration, const i
 	int n=configuration[figure]["n"].as_int_or_die();
 	double height=configuration[figure]["height"].as_double_or_die();
 	for(int i=1;i<n+1;i++){
-		double x=cos(2*i*M_PI/n);
-		double y=sin(2*i*M_PI/n);
+		double x=cos(2.0*i*M_PI/n);
+		double y=sin(2.0*i*M_PI/n);
 		newfig.addPoint(Vector3D::point(x,y,0));
 	}
 	for(int i=1;i<n+1;i++){
@@ -689,7 +689,7 @@ figure3D Engine3D::DrawCylinder(const ini::Configuration &configuration, const i
 	face3D megafaceTop;
 	face3D megafaceBottom;
 	for(int i=0;i<n;i++){
-		std::vector<int> tempvec={i,(i+1)%n,(n+(i+1)%n),n+i};
+		std::vector<int> tempvec={i,1*(i+1)%n,1*(n+(i+1)%n),1*n+i};
 		newfig.addFace(face3D(tempvec));
 		megafaceTop.addPoint(n+i);
 		megafaceBottom.addPoint(i);
@@ -794,7 +794,7 @@ Matrix Engine3D::eyePointTrans(const Vector3D &eyepoint){
 }
 
 figure3D Engine3D::combineFigures(std::vector<figure3D> figures){
-	figure3D newfig=figure3D(figures[0].ambientReflection);
+	figure3D newfig=figure3D(figures[0].ambientReflection,figures[0].difusseReflection,figures[0].specularReflection,figures[0].reflectionCoefficient);
 	int pointcount=0;
 	for(figure3D fig:figures){
 		for(auto i:fig.points){
@@ -1023,8 +1023,12 @@ std::vector<Light*> Engine3D::readLights(const ini::Configuration &configuration
 		figColor::Color ambient(ambientvec[0],ambientvec[1],ambientvec[2]);
 		figColor::Color diffuse(0,0,0);
 		figColor::Color specular(0,0,0);
+		std::vector<double> spec;
+		bool specexists=configuration[light]["specularLight"].as_double_tuple_if_exists(spec);
+		if(specexists){
+			specular=figColor::Color(spec[0],spec[1],spec[2]);
+		}
 		if(exists){
-
 			std::vector<double> diffusevec=configuration[light]["diffuseLight"].as_double_tuple_or_die();
 			diffuse=figColor::Color(diffusevec[0],diffusevec[1],diffusevec[2]);
 			if(infinity){
