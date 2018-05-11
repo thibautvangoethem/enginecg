@@ -539,6 +539,14 @@ Vector3D Vector3D::normalise(Vector3D arg)
         return arg;
 }
 
+bool Vector3D::operator==(const Vector3D &rhs) const{
+	return x==rhs.x&&y==rhs.y&&z==rhs.z&&this->is_point()==rhs.is_point();
+}
+
+bool Vector3D::operator!=(const Vector3D &rhs) const{
+	return !(x==rhs.x&&y==rhs.y&&z==rhs.z&&this->is_point()==rhs.is_point());
+}
+
 std::ostream &operator<<(std::ostream   &output_stream,
                          const Vector3D &vector)
 {

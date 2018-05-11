@@ -29,9 +29,9 @@ void figure3D::scaleFigure(double scaleFactor){
 	}
 }
 
-void figure3D::rotateX(double angle){
+void figure3D::rotateX(double angle,bool isradian){
 	Matrix rotx;
-	double radAngle =figure3D::toRadian(angle);
+	double radAngle =(isradian)?angle:figure3D::toRadian(angle);
 	rotx(2,2)=cos(radAngle);
 	rotx(2,3)=sin(radAngle);
 	rotx(3,2)=-sin(radAngle);
@@ -41,9 +41,9 @@ void figure3D::rotateX(double angle){
 		}
 }
 
-void figure3D::rotateY(double angle){
+void figure3D::rotateY(double angle,bool isradian){
 	Matrix roty;
-	double radAngle =figure3D::toRadian(angle);
+	double radAngle =(isradian)?angle:figure3D::toRadian(angle);
 	roty(1,1)=cos(radAngle);
 	roty(1,3)=-sin(radAngle);
 	roty(3,1)=sin(radAngle);
@@ -53,9 +53,9 @@ void figure3D::rotateY(double angle){
 		}
 }
 
-void figure3D::rotateZ(const double angle){
+void figure3D::rotateZ(const double angle,bool isradian){
 	Matrix roty;
-	double radAngle =figure3D::toRadian(angle);
+	double radAngle =(isradian)?angle:figure3D::toRadian(angle);
 	roty(1,1)=cos(radAngle);
 	roty(2,1)=-sin(radAngle);
 	roty(1,2)=sin(radAngle);

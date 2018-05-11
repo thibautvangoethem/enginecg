@@ -22,7 +22,7 @@ public:
 	Fractals3D();
 	virtual ~Fractals3D();
 	static void generateFractal(figure3D& fig, std::vector<figure3D>& fractal,const int nr_iterations, const double scale);
-	static void createMengerSponge(figure3D& fig, std::vector<figure3D>& fractal,int nr_iterations);
+	static void createMengerSponge(figure3D& fig,int nr_iterations);
 	static std::vector<figure3D> mengerAid(figure3D fig);
 };
 

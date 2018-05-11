@@ -456,6 +456,11 @@ class Vector3D
                  * \return The normalised vector.
                  */
                 static Vector3D normalise(Vector3D arg);
+
+
+                bool operator==(const Vector3D &rhs) const;
+
+                bool operator!=(const Vector3D &rhs) const;
 };
 
 /**

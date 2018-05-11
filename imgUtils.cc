@@ -356,7 +356,7 @@ EasyImage imgUtils::TrianglesToImg(const ini::Configuration &configuration,std::
 	double dx=(imagex/2.0)-DCx;
 	double dy=(imagey/2.0)-DCy;
 	std::vector<double> achtergrond=configuration["General"]["backgroundcolor"].as_double_tuple_or_die();
-	img::EasyImage image(roundToInt(imagex),roundToInt(imagey),Color(roundToInt(achtergrond[0]*255),roundToInt(achtergrond[1]*255),roundToInt(achtergrond[2]*255)));
+	img::EasyImage image(roundToInt(imagex+1),roundToInt(imagey+1),Color(roundToInt(achtergrond[0]*255),roundToInt(achtergrond[1]*255),roundToInt(achtergrond[2]*255)));
 	ZBuffer zbuf;
 	if(WithZBuf){
 		zbuf=ZBuffer(roundToInt(imagey),roundToInt(imagex));
@@ -415,7 +415,7 @@ void imgUtils::draw_zbuf_triag(ZBuffer& buf, img::EasyImage& image,
 					if(ld.is_vector()){
 						Vector3D l=-ld;
 						l.normalise();
-						double cosAlpha=(n.x*l.x)+(n.y*l.y)+(n.z*l.z);
+						double cosAlpha=n.dot(l);
 						if(cosAlpha>0){
 							redd+=i->diffuseLight.red*diffuseReflection.red*cosAlpha;
 							greend+=i->diffuseLight.green*diffuseReflection.green*cosAlpha;
@@ -482,7 +482,7 @@ void imgUtils::draw_zbuf_triag(ZBuffer& buf, img::EasyImage& image,
 						Vector3D toEye=-point;
 						toEye.normalise();
 						double cosBeta=r.dot(toEye);
-						if(cosBeta>=0&&cosAlpha>0){
+						if(cosBeta>=0){
 							redp+= light->specularLight.red*specularReflection.red*pow(cosBeta,reflectionCoeff);
 							greenp+= light->specularLight.green*specularReflection.green*pow(cosBeta,reflectionCoeff);
 							bluep+= light->specularLight.blue*specularReflection.blue*pow(cosBeta,reflectionCoeff);

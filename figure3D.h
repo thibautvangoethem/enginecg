@@ -32,9 +32,9 @@ public:
 
 	virtual ~figure3D(){};
 	void scaleFigure(const double scaleFactor);
-	void rotateX(double angle);
-	void rotateY(double angle);
-	void rotateZ(double angle);
+	void rotateX(double angle,bool isradian=false);
+	void rotateY(double angle,bool isradian=false);
+	void rotateZ(double angle,bool isradian=false);
 	void translate(const Vector3D vec);
 	void addFace(face3D face);
 	void addPoint(Vector3D v);

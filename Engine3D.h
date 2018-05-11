@@ -33,14 +33,16 @@ public:
 	static figure3D DrawOctahedron(const ini::Configuration &configuration,int figcount);
 	static figure3D DrawIcosahedron(const ini::Configuration &configuration,int figcount);
 	static figure3D DrawDodecahedron(const ini::Configuration &configuration,int figcount);
-	static figure3D DrawSphere(const ini::Configuration &configuration, const int figcount);
+	static figure3D DrawSphere(const ini::Configuration &configuration, const int figcount,const int n);
 	static figure3D DrawCone(const ini::Configuration &configuration, const int figcount);
-	static figure3D DrawCylinder(const ini::Configuration &configuration, const int figcount);
+	static figure3D DrawCylinder(const ini::Configuration &configuration, const int figcount,const int n,const double height);
 	static figure3D DrawTorus(const ini::Configuration &configuration, const int figcount);
 	static figure3D DrawBuckyBall(const ini::Configuration &configuration, const int figcount);
+	static figure3D DrawThickFigure(const ini::Configuration &configuration, const int figcount,figure3D& fig);
 	static void applyTransformation(figure3D &fig, const Matrix &mat);
 	static void applyAllTransformation(std::vector<figure3D> &figs, const Matrix &mat);
 	static Matrix eyePointTrans(const Vector3D &eyepoint);
+	static void Topolar(const Vector3D &eyepoint,double& theta,double& phi,double& r);
 	double toRadian(double angle);
 	static figure3D combineFigures(std::vector<figure3D> figures);
 	static std::vector<Light*> readLights(const ini::Configuration &configuration);

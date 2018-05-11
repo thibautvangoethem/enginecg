@@ -34,6 +34,7 @@ img::EasyImage generate_image(const ini::Configuration &configuration)
 	simpleGenerations simple;
 	L2DEngine l2dengine;
 	Engine3D engine3D;
+	[](){};
 			if(typeString== "IntroColorRectangle"){
 				return simple.generate_ColorRectangle(configuration);
 			}else if(typeString== "IntroBlocks"){

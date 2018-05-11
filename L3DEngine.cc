@@ -37,8 +37,37 @@ L3DEngine::~L3DEngine() {
 
 figure3D L3DEngine::L3D_ToFigure(const ini::Configuration &configuration,int figcount){
 	std::string figure="Figure"+std::to_string(figcount);
-	std::vector<double> kleur=configuration[figure]["color"].as_double_tuple_or_die();
-	figure3D newfig=figure3D(figColor::Color(roundToInt(255*kleur[0]),roundToInt(255*kleur[1]),roundToInt(255*kleur[2])));
+		std::vector<double> kleur;
+			std::vector<double> kleur2;
+			std::vector<double> kleur3;
+			bool kleurbool=configuration[figure]["color"].as_double_tuple_if_exists(kleur);
+			double ref;
+			if(kleurbool){
+				kleur=configuration[figure]["color"].as_double_tuple_or_die();
+				kleur2={0,0,0};
+				kleur3={0,0,0};
+				ref=0;
+			}else{
+				kleur=configuration[figure]["ambientReflection"].as_double_tuple_or_die();
+				bool testbool=configuration[figure]["diffuseReflection"].as_double_tuple_if_exists(kleur2);
+				if(testbool){
+					kleur2=configuration[figure]["diffuseReflection"].as_double_tuple_or_die();
+				}else{
+					kleur2={0,0,0};
+				}
+				testbool=configuration[figure]["specularReflection"].as_double_tuple_if_exists(kleur3);
+				if(testbool){
+					kleur3=configuration[figure]["specularReflection"].as_double_tuple_or_die();
+				ref=configuration[figure]["reflectionCoefficient"].as_double_or_die();
+				}else{
+					kleur3={0,0,0};
+					ref=0;
+				}
+			}
+		figure3D newfig=figure3D(
+			figColor::Color(kleur[0],kleur[1],kleur[2]),
+			figColor::Color(kleur2[0],kleur2[1],kleur2[2]),
+			figColor::Color(kleur3[0],kleur3[1],kleur3[2]),ref);
 	std::string toRead=configuration[figure]["inputfile"].as_string_or_die();
 	LParser::LSystem3D l_system;
 	std::cout<<"reading: "<< toRead << std::endl;
@@ -141,5 +170,41 @@ figure3D L3DEngine::L3D_ToFigure(const ini::Configuration &configuration,int fig
 		    }
 		}
 	}
+//failed attempt at deleting excess points in straight lines
+//	for(unsigned int face1=0;face1<newfig.faces.size();face1++){
+//		loopstart:
+//		for(unsigned int face2=0;face2<newfig.faces.size();face2++){
+//			if(newfig.points[newfig.faces[face1].pointsIndex[0]]-newfig.points[newfig.faces[face1].pointsIndex[1]]==newfig.points[newfig.faces[face2].pointsIndex[0]]-newfig.points[newfig.faces[face2].pointsIndex[1]]){
+//				if(newfig.points[newfig.faces[face1].pointsIndex[1]]==newfig.points[newfig.faces[face2].pointsIndex[0]]){
+//					newfig.addFace(face3D({newfig.faces[face1].pointsIndex[0],newfig.faces[face2].pointsIndex[1]}));
+//					int todiminisch;
+//					if(newfig.faces[face1].pointsIndex[0]>newfig.faces[face2].pointsIndex[1]){
+//						todiminisch=newfig.faces[face2].pointsIndex[1];
+//						newfig.points.erase(newfig.points.begin()+newfig.faces[face1].pointsIndex[0]);
+//						newfig.points.erase(newfig.points.begin()+newfig.faces[face2].pointsIndex[1]);
+//					}else{
+//						todiminisch=newfig.faces[face1].pointsIndex[0];
+//						newfig.points.erase(newfig.points.begin()+newfig.faces[face2].pointsIndex[1]);
+//						newfig.points.erase(newfig.points.begin()+newfig.faces[face1].pointsIndex[0]);
+//					}
+//					for(face3D& diminischface:newfig.faces){
+//						for(int& point:diminischface.pointsIndex){
+//							if(point>todiminisch){
+//								point-=2;
+//							}
+//						}
+//					}
+//					if(face1>face2){
+//						newfig.faces.erase(newfig.faces.begin()+face1);
+//						newfig.faces.erase(newfig.faces.begin()+face2);
+//					}else{
+//						newfig.faces.erase(newfig.faces.begin()+face2);
+//						newfig.faces.erase(newfig.faces.begin()+face1);
+//					}
+//					goto loopstart;
+//				}
+//			}
+//		}
+//	}
 return newfig;
 }

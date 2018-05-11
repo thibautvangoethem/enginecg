@@ -63,7 +63,8 @@ void Fractals3D::generateFractal(figure3D& fig, std::vector<figure3D>& fractal,c
 	}
 }
 
-void Fractals3D::createMengerSponge(figure3D& fig, std::vector<figure3D>& fractal, int nr_iterations){
+void Fractals3D::createMengerSponge(figure3D& fig, int nr_iterations){
+	std::vector<figure3D> fractal;
 	if(fractal.size()==0){
 		fractal.push_back(fig);
 	}
@@ -83,6 +84,7 @@ void Fractals3D::createMengerSponge(figure3D& fig, std::vector<figure3D>& fracta
 		}
 		nr_iterations-- ;
 	}
+	fig=Engine3D::combineFigures(fractal);
 }
 std::vector<figure3D> Fractals3D::mengerAid(figure3D fig){
 	std::vector<figure3D> menger;

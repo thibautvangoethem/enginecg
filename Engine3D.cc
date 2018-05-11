@@ -41,87 +41,57 @@ std::vector<figure3D> Engine3D::draw3D(const ini::Configuration &configuration){
 			std::string figure="Figure"+std::to_string(figcount);
 			std::string figureType=configuration[figure]["type"].as_string_or_die();
 			figure3D newfig=figure3D(figColor::Color(0,0,0));
-			if(configuration[figure]["type"].as_string_or_die()=="LineDrawing"){
-				newfig=Engine3D::LineDrawing(configuration,figcount);
-			}else if(configuration[figure]["type"].as_string_or_die()=="Cube"){
-				newfig=Engine3D::DrawCube(configuration,figcount);
-			}else if(configuration[figure]["type"].as_string_or_die()=="Tetrahedron"){
-				newfig=Engine3D::DrawTetrahedron(configuration,figcount);
-			}else if(configuration[figure]["type"].as_string_or_die()=="Icosahedron"){
-				newfig=Engine3D::DrawIcosahedron(configuration,figcount);
-			}else if(configuration[figure]["type"].as_string_or_die()=="Octahedron"){
-				newfig=Engine3D::DrawOctahedron(configuration,figcount);
-			}else if(configuration[figure]["type"].as_string_or_die()=="Dodecahedron"){
-				newfig=Engine3D::DrawDodecahedron(configuration,figcount);
-			}else if(configuration[figure]["type"].as_string_or_die()=="Sphere"){
-				newfig=Engine3D::DrawSphere(configuration,figcount);
-			}else if(configuration[figure]["type"].as_string_or_die()=="Cone"){
+			std::string type=configuration[figure]["type"].as_string_or_die();
+
+			if(0==type.compare(type.length()-4,4,"Cone")){
 				newfig=Engine3D::DrawCone(configuration,figcount);
-			}else if(configuration[figure]["type"].as_string_or_die()=="Cylinder"){
-				newfig=Engine3D::DrawCylinder(configuration,figcount);
-			}else if(configuration[figure]["type"].as_string_or_die()=="Torus"){
+			}else if(0==type.compare(type.length()-4,4,"Cube")){
+				newfig=Engine3D::DrawCube(configuration,figcount);
+			}else if(0==type.compare(type.length()-5,5,"torus")){
 				newfig=Engine3D::DrawTorus(configuration,figcount);
-			}else if(configuration[figure]["type"].as_string_or_die()=="3DLSystem"){
+			}else if(0==type.compare(type.length()-6,6,"Sphere")){
+				int n=configuration[figure]["n"].as_int_or_die();
+				newfig=Engine3D::DrawSphere(configuration,figcount,n);
+			}else if(0==type.compare(type.length()-8,8,"Cylinder")){
+				int n=configuration[figure]["n"].as_int_or_die();
+				double height=configuration[figure]["height"].as_double_or_die();
+				newfig=Engine3D::DrawCylinder(configuration,figcount,n,height);
+			}else if(0==type.compare(type.length()-9,9,"3DLSystem")){
 				newfig=L3DEngine::L3D_ToFigure(configuration,figcount);
-			}else if(configuration[figure]["type"].as_string_or_die()=="Cube"){
-				newfig=Engine3D::DrawCube(configuration,figcount);
-			}else if(configuration[figure]["type"].as_string_or_die()=="BuckyBall"){
+			}else if(0==type.compare(type.length()-9,9,"BuckyBall")){
 				newfig=Engine3D::DrawBuckyBall(configuration,figcount);
-			}else if(configuration[figure]["type"].as_string_or_die()=="FractalCube"){
-				newfig=Engine3D::DrawCube(configuration,figcount);
-				std::vector<figure3D> fractals;
-				int iterations=configuration[figure]["nrIterations"].as_int_or_die();
-				double scale=configuration[figure]["fractalScale"].as_double_or_die();
-				Fractals3D::generateFractal(newfig,fractals,iterations,scale);
-				newfig=Engine3D::combineFigures(fractals);
-			}else if(configuration[figure]["type"].as_string_or_die()=="FractalTetrahedron"){
-				newfig=Engine3D::DrawTetrahedron(configuration,figcount);
-				std::vector<figure3D> fractals;
-				int iterations=configuration[figure]["nrIterations"].as_int_or_die();
-				double scale=configuration[figure]["fractalScale"].as_double_or_die();
-				Fractals3D::generateFractal(newfig,fractals,iterations,scale);
-				newfig=Engine3D::combineFigures(fractals);
-			}else if(configuration[figure]["type"].as_string_or_die()=="FractalIcosahedron"){
-				newfig=Engine3D::DrawIcosahedron(configuration,figcount);
-				std::vector<figure3D> fractals;
-				int iterations=configuration[figure]["nrIterations"].as_int_or_die();
-				double scale=configuration[figure]["fractalScale"].as_double_or_die();
-				Fractals3D::generateFractal(newfig,fractals,iterations,scale);
-				newfig=Engine3D::combineFigures(fractals);
-			}else if(configuration[figure]["type"].as_string_or_die()=="FractalOctahedron"){
+			}else if(0==type.compare(type.length()-10,10,"Octahedron")){
 				newfig=Engine3D::DrawOctahedron(configuration,figcount);
-				std::vector<figure3D> fractals;
-				int iterations=configuration[figure]["nrIterations"].as_int_or_die();
-				double scale=configuration[figure]["fractalScale"].as_double_or_die();
-				Fractals3D::generateFractal(newfig,fractals,iterations,scale);
-				newfig=Engine3D::combineFigures(fractals);
-			}else if(configuration[figure]["type"].as_string_or_die()=="FractalDodecahedron"){
+			}else if(0==type.compare(type.length()-11,11,"Tetrahedron")){
+				newfig=Engine3D::DrawTetrahedron(configuration,figcount);
+			}else if(0==type.compare(type.length()-11,11,"LineDrawing")){
+				newfig=Engine3D::LineDrawing(configuration,figcount);
+			}else if(0==type.compare(type.length()-11,11,"Icosahedron")){
+				newfig=Engine3D::DrawIcosahedron(configuration,figcount);
+			}else if(0==type.compare(type.length()-12,12,"Dodecahedron")){
 				newfig=Engine3D::DrawDodecahedron(configuration,figcount);
-				std::vector<figure3D> fractals;
-				int iterations=configuration[figure]["nrIterations"].as_int_or_die();
-				double scale=configuration[figure]["fractalScale"].as_double_or_die();
-				Fractals3D::generateFractal(newfig,fractals,iterations,scale);
-				newfig=Engine3D::combineFigures(fractals);
-			}else if(configuration[figure]["type"].as_string_or_die()=="MengerSponge"){
+			}else if(0==type.compare(type.length()-12,12,"MengerSponge")){
 				newfig=Engine3D::DrawCube(configuration,figcount);
-				std::vector<figure3D> fractals;
 				int iterations=configuration[figure]["nrIterations"].as_int_or_die();
-				Fractals3D::createMengerSponge(newfig,fractals,iterations);
-				newfig=Engine3D::combineFigures(fractals);
-			}else if(configuration[figure]["type"].as_string_or_die()=="FractalBuckyBall"){
-				newfig=Engine3D::DrawBuckyBall(configuration,figcount);
+				Fractals3D::createMengerSponge(newfig,iterations);
+			}
+
+			if(0==type.compare(0,7,"Fractal")){
 				std::vector<figure3D> fractals;
 				int iterations=configuration[figure]["nrIterations"].as_int_or_die();
 				double scale=configuration[figure]["fractalScale"].as_double_or_die();
 				Fractals3D::generateFractal(newfig,fractals,iterations,scale);
 				newfig=Engine3D::combineFigures(fractals);
 			}
+			if(0==type.compare(0,5,"Thick")&&0!=type.compare(type.length()-9,9,"BuckyBall")){
+				newfig=Engine3D::DrawThickFigure(configuration,figcount,newfig);
+			}
 			int rotatex=configuration[figure]["rotateX"].as_double_or_die();
 			int rotatey=configuration[figure]["rotateY"].as_double_or_die();
 			int rotatez=configuration[figure]["rotateZ"].as_double_or_die();
 			double scale=configuration[figure]["scale"].as_double_or_die();
 			std::vector<double> center=configuration[figure]["center"].as_double_tuple_or_die();
-
+//			std::cout<<newfig.faces.size()<<" "<<newfig.points.size()<<std::endl;
 			if(scale!=1){
 				newfig.scaleFigure(scale);
 			}
@@ -513,7 +483,7 @@ figure3D Engine3D::DrawDodecahedron(const ini::Configuration &configuration,int 
 	return newfig;
 }
 
-figure3D Engine3D::DrawSphere(const ini::Configuration &configuration,const int figcount){
+figure3D Engine3D::DrawSphere(const ini::Configuration &configuration,const int figcount,const int n){
 	std::string figure="Figure"+std::to_string(figcount);
 	std::vector<double> kleur;
 			std::vector<double> kleur2;
@@ -543,7 +513,7 @@ figure3D Engine3D::DrawSphere(const ini::Configuration &configuration,const int 
 				}
 			}
 
-	int n=configuration[figure]["n"].as_int_or_die();
+
 	figure3D oldfig=Engine3D::DrawIcosahedron(configuration,figcount);
 	for(int i=0;i<n;i++){
 		figure3D newfig=figure3D(
@@ -641,7 +611,7 @@ figure3D Engine3D::DrawCone(const ini::Configuration &configuration, const int f
 	return newfig;
 }
 
-figure3D Engine3D::DrawCylinder(const ini::Configuration &configuration, const int figcount){
+figure3D Engine3D::DrawCylinder(const ini::Configuration &configuration, const int figcount,const int n,const double height){
 	std::string figure="Figure"+std::to_string(figcount);
 	std::vector<double> kleur;
 		std::vector<double> kleur2;
@@ -674,8 +644,6 @@ figure3D Engine3D::DrawCylinder(const ini::Configuration &configuration, const i
 		figColor::Color(kleur[0],kleur[1],kleur[2]),
 		figColor::Color(kleur2[0],kleur2[1],kleur2[2]),
 		figColor::Color(kleur3[0],kleur3[1],kleur3[2]),ref);
-	int n=configuration[figure]["n"].as_int_or_die();
-	double height=configuration[figure]["height"].as_double_or_die();
 	for(int i=1;i<n+1;i++){
 		double x=cos(2.0*i*M_PI/n);
 		double y=sin(2.0*i*M_PI/n);
@@ -777,9 +745,10 @@ double Engine3D::toRadian(double angle){
 }
 
 Matrix Engine3D::eyePointTrans(const Vector3D &eyepoint){
-	double r=sqrt(pow(eyepoint.x,2)+pow(eyepoint.y,2)+pow(eyepoint.z,2));
-	double theta=std::atan2(eyepoint.y,eyepoint.x);
-	double phi=std::acos(eyepoint.z/r);
+	double r;
+	double theta;
+	double phi;
+	Engine3D::Topolar(eyepoint,theta,phi,r);
 	Matrix eyePointMatrix;
 	eyePointMatrix(1,1)=-sin(theta);
 	eyePointMatrix(2,1)=cos(theta);
@@ -791,6 +760,12 @@ Matrix Engine3D::eyePointTrans(const Vector3D &eyepoint){
 	eyePointMatrix(3,3)=cos(phi);
 	eyePointMatrix(4,3)=-r;
 	return eyePointMatrix;
+}
+
+void Engine3D::Topolar(const Vector3D &eyepoint,double& theta,double& phi,double& r){
+	r=sqrt(pow(eyepoint.x,2)+pow(eyepoint.y,2)+pow(eyepoint.z,2));
+	theta=std::atan2(eyepoint.y,eyepoint.x);
+	phi=std::acos(eyepoint.z/r);
 }
 
 figure3D Engine3D::combineFigures(std::vector<figure3D> figures){
@@ -982,7 +957,7 @@ figure3D Engine3D::DrawBuckyBall(const ini::Configuration &configuration, const 
 			}
 		}
 	}
-	for(int i=0;i<bucky.points.size();i++){
+	for(unsigned int i=0;i<bucky.points.size();i++){
 		bool used=false;
 		for(int b:usedpoints){
 			if(i==b){
@@ -1052,6 +1027,47 @@ std::vector<Light*> Engine3D::readLights(const ini::Configuration &configuration
 
 	}
 	return lights;
+}
+
+figure3D Engine3D::DrawThickFigure(const ini::Configuration &configuration, const int figcount,figure3D& fig){
+	std::string figure="Figure"+std::to_string(figcount);
+	int m=configuration[figure]["m"].as_int_or_die();
+	int n=configuration[figure]["n"].as_int_or_die();
+	double radius=configuration[figure]["radius"].as_double_or_die();
+	std::vector<figure3D> figures;
+//	for(Vector3D point:fig.points){
+//		figure3D newfig=Engine3D::DrawSphere(configuration,figcount,m);
+//		newfig.scaleFigure(radius);
+//		newfig.translate(Vector3D::point(0,0,0)+point);
+//		figures.push_back(newfig);
+//	}
+	for(face3D face:fig.faces){
+		for(unsigned int i=0;i<face.pointsIndex.size();i++){
+			Vector3D p1=fig.points[face.pointsIndex[i]];
+			Vector3D p2=fig.points[face.pointsIndex[(i+1)%face.pointsIndex.size()]];
+			Vector3D p1p2=p2-p1;
+			//de bol tekenen
+				figure3D newfigSphere=Engine3D::DrawSphere(configuration,figcount,m);
+				newfigSphere.scaleFigure(radius);
+				newfigSphere.translate(Vector3D::point(0,0,0)+p1);
+				figures.push_back(newfigSphere);
+			//cylinders tekekenen
+			double distance=p1p2.length()/radius;
+			figure3D newfig=Engine3D::DrawCylinder(configuration,figcount,n,distance);
+			newfig.scaleFigure(radius);
+//			Matrix trans=Engine3D::eyePointTrans(p1p2);
+			double theta;
+			double phi;
+			double nothing;
+			Engine3D::Topolar(p1p2,theta,phi,nothing);
+			newfig.rotateY(phi,true);
+			newfig.rotateZ(theta,true);
+			newfig.translate(Vector3D::point(0,0,0)+p1);
+			figures.push_back(newfig);
+
+		}
+	}
+	return Engine3D::combineFigures(figures);
 }
 
 
