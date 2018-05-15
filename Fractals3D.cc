@@ -65,28 +65,32 @@ void Fractals3D::generateFractal(figure3D& fig, std::vector<figure3D>& fractal,c
 
 void Fractals3D::createMengerSponge(figure3D& fig, int nr_iterations){
 	std::vector<figure3D> fractal;
-	if(fractal.size()==0){
-		fractal.push_back(fig);
-	}
-	while(nr_iterations>0){
-		if(fractal.size()==1){
-			fractal=Fractals3D::mengerAid(fig);
-		}else{
-			std::vector<figure3D> newfractal;
-			for(figure3D mengercube:fractal){
-				std::vector<figure3D> newcube=mengerAid(mengercube);
-				for(figure3D& fig:newcube){
-					newfractal.push_back(fig);
-				}
-
-			}
-			fractal=newfractal;
+		if(fractal.size()==0){
+			fractal.push_back(fig);
 		}
-		nr_iterations-- ;
+		while(nr_iterations>0){
+			if(fractal.size()==1){
+				fractal=Fractals3D::mengerAid(fig);
+			}else{
+				std::vector<figure3D> newfractal;
+				for(figure3D mengercube:fractal){
+					std::vector<figure3D> newcube=mengerAid(mengercube);
+					for(figure3D& fig:newcube){
+						newfractal.push_back(fig);
+					}
+
+				}
+				fractal=newfractal;
+			}
+			nr_iterations-- ;
 	}
+//	std::vector<figure3D&> refFractal;
+//	for(figure3D& i:fractal){
+//		refFractal.push_back(i);
+//	}
 	fig=Engine3D::combineFigures(fractal);
 }
-std::vector<figure3D> Fractals3D::mengerAid(figure3D fig){
+std::vector<figure3D> Fractals3D::mengerAid(figure3D& fig){
 	std::vector<figure3D> menger;
 	figure3D newcube=fig;
 	double scalefactor=1.0/3.0;

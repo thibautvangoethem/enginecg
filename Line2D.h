@@ -22,8 +22,8 @@ public:
 	figColor::Color color;
 	double z1;
 	double z2;
-	const Point2D getp1();
-	const Point2D getp2();
+	Point2D getp1();
+	Point2D getp2();
 	void setp1(double x, double y);
 	void setp2(double x, double y);
 	const figColor::Color getColor();

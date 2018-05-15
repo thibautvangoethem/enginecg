@@ -9,10 +9,10 @@
 #include "Point2D.h"
 #include "Color.h"
 
-const Point2D Line2D::getp1(){
+Point2D Line2D::getp1(){
 	return Line2D::p1;
 }
-const Point2D Line2D::getp2(){
+Point2D Line2D::getp2(){
 	return Line2D::p2;
 }
 const figColor::Color Line2D::getColor(){

@@ -22,10 +22,7 @@
 #include <utility>
 using namespace std;
 typedef std::list<Line2D> Lines2D;
-inline int roundToInt(double d)
-{
-	return static_cast<int>(round(d));
-}
+
 
 L2DEngine::L2DEngine() {
 	// TODO Auto-generated constructor stub
@@ -107,7 +104,8 @@ Lines2D L2DEngine::L2D_ToLines(const ini::Configuration &configuration){
     		for(char alphaChar:alphabet){
     			if(alphaChar==lchar){
     				if(l_system.draw(lchar)){
-    					lines.push_back(Line2D(Point2D(currentx,currenty),Point2D(currentx+std::cos(currentAngle),currenty+std::sin(currentAngle)),figColor::Color(roundToInt(lijnKleur[0]*255),roundToInt(lijnKleur[1]*255),roundToInt(lijnKleur[2]*255))));
+    					lines.push_back(Line2D(Point2D(currentx,currenty),Point2D(currentx+std::cos(currentAngle),currenty+std::sin(currentAngle)),
+    							figColor::Color(round(lijnKleur[0]*255),round(lijnKleur[1]*255),round(lijnKleur[2]*255))));
     				}
     				currentx=currentx+std::cos(currentAngle);
     				currenty=currenty+std::sin(currentAngle);

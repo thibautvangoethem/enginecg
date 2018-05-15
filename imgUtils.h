@@ -35,9 +35,9 @@ public:
 	static void draw_zbuf_triag(ZBuffer& buf, img::EasyImage& image,
 			Vector3D const& A, Vector3D const& B, Vector3D const& C,
 			double d, double dx, double dy,
-			figColor::Color ambientReflection,
-			figColor::Color diffuseReflection,
-			figColor::Color specularReflection, double reflectionCoeff,
+			figColor::Color& ambientReflection,
+			figColor::Color& diffuseReflection,
+			figColor::Color& specularReflection, double reflectionCoeff,
 			std::vector<Light*>& lights);
 private:
 	static bool isTriangle(figure3D fig);

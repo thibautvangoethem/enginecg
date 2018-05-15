@@ -24,6 +24,7 @@
 #include "Fractals3D.h"
 #include <algorithm>
 
+
 typedef std::list<Line2D> Lines2D;
 inline int roundToInt(double d)
 {
@@ -47,7 +48,7 @@ std::vector<figure3D> Engine3D::draw3D(const ini::Configuration &configuration){
 				newfig=Engine3D::DrawCone(configuration,figcount);
 			}else if(0==type.compare(type.length()-4,4,"Cube")){
 				newfig=Engine3D::DrawCube(configuration,figcount);
-			}else if(0==type.compare(type.length()-5,5,"torus")){
+			}else if(0==type.compare(type.length()-5,5,"Torus")){
 				newfig=Engine3D::DrawTorus(configuration,figcount);
 			}else if(0==type.compare(type.length()-6,6,"Sphere")){
 				int n=configuration[figure]["n"].as_int_or_die();
@@ -81,11 +82,11 @@ std::vector<figure3D> Engine3D::draw3D(const ini::Configuration &configuration){
 				int iterations=configuration[figure]["nrIterations"].as_int_or_die();
 				double scale=configuration[figure]["fractalScale"].as_double_or_die();
 				Fractals3D::generateFractal(newfig,fractals,iterations,scale);
-				newfig=Engine3D::combineFigures(fractals);
-			}
-			if(0==type.compare(0,5,"Thick")&&0!=type.compare(type.length()-9,9,"BuckyBall")){
-				newfig=Engine3D::DrawThickFigure(configuration,figcount,newfig);
-			}
+				figures.insert(figures.end(),fractals.begin(),fractals.end());
+//				&&0!=type.compare(type.length()-9,9,"BuckyBall")
+			}else if(0==type.compare(0,5,"Thick")){
+				Engine3D::DrawThickFigure(configuration,figcount,newfig,figures);
+			}else{
 			int rotatex=configuration[figure]["rotateX"].as_double_or_die();
 			int rotatey=configuration[figure]["rotateY"].as_double_or_die();
 			int rotatez=configuration[figure]["rotateZ"].as_double_or_die();
@@ -108,6 +109,7 @@ std::vector<figure3D> Engine3D::draw3D(const ini::Configuration &configuration){
 			newfig.translate(transVector);
 			figures.push_back(newfig);
 		}
+	}
 	std::vector<double> eyeCoords=configuration["General"]["eye"].as_double_tuple_or_die();
 	Vector3D eyeVector=Vector3D::vector(eyeCoords[0],eyeCoords[1],eyeCoords[2]);
 	Matrix eyeMatrix=Engine3D::eyePointTrans(eyeVector);
@@ -768,7 +770,7 @@ void Engine3D::Topolar(const Vector3D &eyepoint,double& theta,double& phi,double
 	phi=std::acos(eyepoint.z/r);
 }
 
-figure3D Engine3D::combineFigures(std::vector<figure3D> figures){
+figure3D Engine3D::combineFigures(std::vector<figure3D>& figures){
 	figure3D newfig=figure3D(figures[0].ambientReflection,figures[0].difusseReflection,figures[0].specularReflection,figures[0].reflectionCoefficient);
 	int pointcount=0;
 	for(figure3D fig:figures){
@@ -1017,6 +1019,12 @@ std::vector<Light*> Engine3D::readLights(const ini::Configuration &configuration
 				Vector3D loc=Vector3D::point(Vector3D::vector(locationd[0],locationd[1],locationd[2]));
 				loc=loc*eyeMatrix;
 				Light *l=new PointLight(ambient,diffuse,specular,loc);
+				bool withShadow=false;
+				bool shadowExists=configuration["general"]["shadowEnabled"].as_bool_if_exists(withShadow);
+				if(shadowExists&&withShadow){
+					int shadowmask=configuration["general"]["shadowMask"].as_int_or_die();
+					l->shadowmask=ZBuffer(shadowmask,shadowmask);
+				}
 				lights.push_back(l);
 			}
 		}else{
@@ -1029,31 +1037,32 @@ std::vector<Light*> Engine3D::readLights(const ini::Configuration &configuration
 	return lights;
 }
 
-figure3D Engine3D::DrawThickFigure(const ini::Configuration &configuration, const int figcount,figure3D& fig){
+void Engine3D::DrawThickFigure(const ini::Configuration &configuration, const int figcount,figure3D& fig,std::vector<figure3D>& figures){
 	std::string figure="Figure"+std::to_string(figcount);
 	int m=configuration[figure]["m"].as_int_or_die();
 	int n=configuration[figure]["n"].as_int_or_die();
 	double radius=configuration[figure]["radius"].as_double_or_die();
-	std::vector<figure3D> figures;
-//	for(Vector3D point:fig.points){
-//		figure3D newfig=Engine3D::DrawSphere(configuration,figcount,m);
-//		newfig.scaleFigure(radius);
-//		newfig.translate(Vector3D::point(0,0,0)+point);
-//		figures.push_back(newfig);
-//	}
+//	std::vector<figure3D> figures;
+	//de bol tekenen
+	figure3D figSphere=Engine3D::DrawSphere(configuration,figcount,m);
+	figSphere.scaleFigure(radius);
+	for(unsigned int i=0;i<fig.points.size();i++){
+		figure3D newfigSphere=figSphere;
+		newfigSphere.translate(Vector3D::point(0,0,0)+fig.points[i]);
+		figures.push_back(newfigSphere);
+	}
+//	figure3D cylinder=Engine3D::DrawCylinder(configuration,figcount,n,1);
 	for(face3D face:fig.faces){
 		for(unsigned int i=0;i<face.pointsIndex.size();i++){
 			Vector3D p1=fig.points[face.pointsIndex[i]];
 			Vector3D p2=fig.points[face.pointsIndex[(i+1)%face.pointsIndex.size()]];
 			Vector3D p1p2=p2-p1;
-			//de bol tekenen
-				figure3D newfigSphere=Engine3D::DrawSphere(configuration,figcount,m);
-				newfigSphere.scaleFigure(radius);
-				newfigSphere.translate(Vector3D::point(0,0,0)+p1);
-				figures.push_back(newfigSphere);
+//			figure3D newfig=cylinder;
 			//cylinders tekekenen
 			double distance=p1p2.length()/radius;
+//			Engine3D::AddCylinderHeight(newfig,distance-1,n);
 			figure3D newfig=Engine3D::DrawCylinder(configuration,figcount,n,distance);
+
 			newfig.scaleFigure(radius);
 //			Matrix trans=Engine3D::eyePointTrans(p1p2);
 			double theta;
@@ -1065,9 +1074,16 @@ figure3D Engine3D::DrawThickFigure(const ini::Configuration &configuration, cons
 			newfig.translate(Vector3D::point(0,0,0)+p1);
 			figures.push_back(newfig);
 
+
+
 		}
 	}
-	return Engine3D::combineFigures(figures);
+
 }
 
+void Engine3D::AddCylinderHeight(figure3D& cylinder,double addition,double n){
+	for(int i=0;i<cylinder.points.size();i++){
+		cylinder.points[n+i].y+=addition;
+	}
+}
 

@@ -16,6 +16,7 @@
 #include "figure3D.h"
 #include "simpleGenerations.h"
 #include "ZBuffer.h"
+#include "Light.h"
 
 #include <tgmath.h>
 #include <cstdlib>
@@ -29,13 +30,13 @@
 #include <list>
 #include <utility>
 #include <limits>
-#include "Light.h"
 #include "imgUtils.h"
 using namespace img;
 typedef std::list<Line2D> Lines2D;
 inline int roundToInt(double d)
 {
-	return static_cast<int>(round(d));
+	int x = static_cast<int>(round(d));
+	return x;
 }
 
 imgUtils::imgUtils() {
@@ -81,10 +82,20 @@ EasyImage imgUtils::LinesToImg(const ini::Configuration &configuration,Lines2D& 
 		i.p2.y*=scale;
 	}
 	for(Line2D i:lines){
-		unsigned int x1=roundToInt((i.getp1().x)+dx);
-		unsigned int y1=roundToInt((i.getp1().y)+dy);
-		unsigned int x2=roundToInt((i.getp2().x)+dx);
-		unsigned int y2=roundToInt((i.getp2().y)+dy);
+//		if(i.getp1().x>imagex||i.getp1().y>imagey||i.getp2().x>imagex||i.getp2().y>imagey||i.getp1().x<0||i.getp1().y<0||i.getp2().x<0||i.getp2().y<0){
+//			std::cout<<i.getp1().x<<" "<<i.getp1().y<<" "<<i.getp2().x<<" "<<i.getp2().y<<std::endl;
+//		}
+		unsigned int dx1=i.p1.x+dx;
+		unsigned int dx2=i.p2.x+dx;
+		unsigned int dy1=i.p1.y+dy;
+		unsigned int dy2=i.p2.y+dy;
+//		if(i.getp1().x>imagex||i.getp1().y>imagey||i.getp2().x>imagex||i.getp2().y>imagey||i.getp1().x<0||i.getp1().y<0||i.getp2().x<0||i.getp2().y<0){
+//			std::cout<<i.getp1().x<<" "<<i.getp1().y<<" "<<i.getp2().x<<" "<<i.getp2().y<<std::endl;
+//		}
+		unsigned int x1=roundToInt(dx1);
+		unsigned int y1=roundToInt(dy1);
+		unsigned int x2=roundToInt(dx2);
+		unsigned int y2=roundToInt(dy2);
 		if(!WithZBuf){
 			image.draw_line(x1,y1,x2,y2,img::Color(i.color.red,i.color.green,i.color.blue));
 		}else{
@@ -358,10 +369,16 @@ EasyImage imgUtils::TrianglesToImg(const ini::Configuration &configuration,std::
 	std::vector<double> achtergrond=configuration["General"]["backgroundcolor"].as_double_tuple_or_die();
 	img::EasyImage image(roundToInt(imagex+1),roundToInt(imagey+1),Color(roundToInt(achtergrond[0]*255),roundToInt(achtergrond[1]*255),roundToInt(achtergrond[2]*255)));
 	ZBuffer zbuf;
+//	std::cout<<figures.size()<<std::endl;
 	if(WithZBuf){
 		zbuf=ZBuffer(roundToInt(imagey),roundToInt(imagex));
 	}
+	for(auto& light:Lights){
+
+		light->MakeShadowMask(figures);
+	}
 	for(figure3D driehoek:figures){
+//		std::cout<<driehoek.points.size()<<" "<<driehoek.faces.size()<<std::endl;
 		if(imgUtils::isTriangle(driehoek)){
 			std::vector<Vector3D> points=driehoek.points;
 			for(face3D driehoekFace:driehoek.faces){
@@ -377,9 +394,9 @@ EasyImage imgUtils::TrianglesToImg(const ini::Configuration &configuration,std::
 void imgUtils::draw_zbuf_triag(ZBuffer& buf, img::EasyImage& image,
 		Vector3D const& A, Vector3D const& B, Vector3D const& C,
 		double d, double dx, double dy,
-		figColor::Color ambientReflection,
-		figColor::Color diffuseReflection,
-		figColor::Color specularReflection, double reflectionCoeff,
+		figColor::Color& ambientReflection,
+		figColor::Color& diffuseReflection,
+		figColor::Color& specularReflection, double reflectionCoeff,
 		std::vector<Light*>& lights){
 
 	Point2D A2=Point2D((d*A.x/(-A.z))+dx,(d*A.y/(-A.z))+dy);
@@ -396,10 +413,6 @@ void imgUtils::draw_zbuf_triag(ZBuffer& buf, img::EasyImage& image,
 	Vector3D n=Vector3D::vector(w1,w2,w3);
 	n.normalise();
 	double k=w1*A.x+w2*A.y+w3*A.z;
-
-	//zoek de lichten die per pixel berekent moeten worden
-	std::vector<Light*> pixelLights;
-
 	if(k!=0){
 
 		//bereken kleuren die op heel het vlak werken
@@ -458,12 +471,15 @@ void imgUtils::draw_zbuf_triag(ZBuffer& buf, img::EasyImage& image,
 
 			double xl=round(std::min(xlab,std::min(xlac,xlbc))+0.5);
 			double xr=round(std::max(xrab,std::max(xrac,xrbc))-0.5);
+			xl=(xl>buf.zBuffer.size())?buf.zBuffer.size():xl;
+			xr=(xr<0)?0:xr;
+//			std::cout<<xl<<" "<<xr<<std::endl;
 			for(int pix=xl;pix<=xr;pix++){
 				double redp=redd;
 				double greenp=greend;
 				double bluep=blued;
-				double z=1.0001*(1/zg)+(pix-xg)*dzdx+(i-yg)*dzdy;
-				if(buf.zBuffer[pix][i]>z){
+				double z=(1/zg)+(pix-xg)*dzdx+(i-yg)*dzdy;
+				if(buf.zBuffer.size()>pix&&buf.zBuffer[pix].size()>i&&buf.zBuffer[pix][i]>z){
 					buf.zBuffer[pix][i]=z;
 					for(auto light:lights){
 						Vector3D ld=light->getSourceVector();
