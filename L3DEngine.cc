@@ -26,14 +26,6 @@ inline int roundToInt(double d)
 {
 	return static_cast<int>(round(d));
 }
-L3DEngine::L3DEngine() {
-	// TODO Auto-generated constructor stub
-
-}
-
-L3DEngine::~L3DEngine() {
-	// TODO Auto-generated destructor stub
-}
 
 figure3D L3DEngine::L3D_ToFigure(const ini::Configuration &configuration,int figcount){
 	std::string figure="Figure"+std::to_string(figcount);

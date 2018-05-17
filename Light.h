@@ -18,12 +18,7 @@
 
 class Light {
   public:
-	Light(figColor::Color am,figColor::Color diff,figColor::Color spec): ambientLight(am),diffuseLight(diff), specularLight(spec) {
-		d=0;
-		dx=0;
-		dy=0;
-	}
-	virtual ~Light(){};
+
 	//de ambiente licht component
 	figColor::Color ambientLight;
 	//de diffuse licht component
@@ -39,22 +34,53 @@ class Light {
 	double dx;
 	double dy;
 
+	/**
+	 * \brief a constructor that initializes the colors and the reflection coeficcinet
+	 */
+	Light(figColor::Color am,figColor::Color diff,figColor::Color spec): ambientLight(am),diffuseLight(diff), specularLight(spec) {
+		d=0;
+		dx=0;
+		dy=0;
+	}
+
+	/**
+	 * \brief base destructor
+	 */
+	virtual ~Light(){};
+
+	/**
+	 * \brief a function that returns the soruce vector, should be overwritten in the inhereted classes
+	 */
 	virtual Vector3D getSourceVector();
 
+	/**
+	 * \brief a function that makes the shadowmask for this light
+	 * @param figures all the figures that are used to create the shadowmask
+	 */
 	void MakeShadowMask(std::vector<figure3D>& figures);
 
-	void ShadowMAskTriangle(Vector3D const& A, Vector3D const& B, Vector3D const& C);
+	/**
+	 * \brief a function that makes adds a triangle to the shadowmask
+	 * @param A,B,C the points of the triangle
+	 */
+	void ShadowMaskTriangle(Vector3D const& A, Vector3D const& B, Vector3D const& C);
 
+	/**
+	 * \brief a function that calculates the eyepoint vector for this light
+	 * @param eyepoint the eyepoint of this light
+	 */
 	static Matrix eyepointtrans(Vector3D eyepoint);
 };
 
 class InfLight: public Light
 {
   public:
-	InfLight(figColor::Color am,figColor::Color diff,figColor::Color spec,Vector3D ld):Light(am,diff,spec),ldVector(ld){};
-	//de richting waarin het
-	//licht schijnt
 	Vector3D ldVector;
+
+	/**
+	 * \brief a constructor for a light in infinity  that initializes everythin
+	 */
+	InfLight(figColor::Color am,figColor::Color diff,figColor::Color spec,Vector3D ld):Light(am,diff,spec),ldVector(ld){};
 
 	Vector3D getSourceVector() override;
 };
@@ -62,11 +88,15 @@ class InfLight: public Light
 class PointLight: public Light
 {
   public:
+	Vector3D location;
+
+	/**
+	 * \brief a constructor for a pointlight that initializes everything
+	 */
 	PointLight(figColor::Color am,figColor::Color diff,figColor::Color spec,Vector3D loc):Light(am,diff,spec),location(loc){
 		eye=Light::eyepointtrans(location);
 	};
-	//de locatie van de puntbron
-	Vector3D location;
+
 
 	Vector3D getSourceVector() override;
 };

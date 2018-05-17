@@ -22,16 +22,6 @@
 #include "Line2D.h"
 #include "L3DEngine.h"
 
-Fractals3D::Fractals3D() {
-	// TODO Auto-generated constructor stub
-
-}
-
-Fractals3D::~Fractals3D() {
-	// TODO Auto-generated destructor stub
-
-}
-
 void Fractals3D::generateFractal(figure3D& fig, std::vector<figure3D>& fractal,const int nr_iterations, const double scale){
 	if(fractal.size()==0){
 		fractal.push_back(fig);

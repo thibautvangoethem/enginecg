@@ -24,15 +24,6 @@ using namespace std;
 typedef std::list<Line2D> Lines2D;
 
 
-L2DEngine::L2DEngine() {
-	// TODO Auto-generated constructor stub
-
-}
-
-L2DEngine::~L2DEngine() {
-	// TODO Auto-generated destructor stub
-}
-
 Lines2D L2DEngine::L2D_ToLines(const ini::Configuration &configuration){
 	std::string toRead=configuration["2DLSystem"]["inputfile"].as_string_or_die();
 	LParser::LSystem2D l_system;

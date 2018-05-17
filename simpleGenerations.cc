@@ -20,15 +20,6 @@ inline int roundToInt(double d)
 	return static_cast<int>(round(d));
 }
 
-
-simpleGenerations::simpleGenerations() {
-	// TODO Auto-generated constructor stub
-
-}
-
-simpleGenerations::~simpleGenerations() {
-	// TODO Auto-generated destructor stub
-}
 EasyImage simpleGenerations::generate_QuarterCircle(const ini::Configuration &configuration){
 	const unsigned int width = configuration["ImageProperties"]["width"].as_int_or_die();
 	const unsigned int height = configuration["ImageProperties"]["height"].as_int_or_die();
@@ -47,7 +38,7 @@ EasyImage simpleGenerations::generate_QuarterCircle(const ini::Configuration &co
 						image(i,j).blue = roundToInt(achtergrond[2]*255);
 						}
 					}
-	for(int i=0;i<lines;i++){
+	for(unsigned int i=0;i<lines;i++){
 		image.draw_line(0,h*i,w*i,height-1,img::Color( roundToInt(lijn[0]*255),roundToInt(lijn[1]*255),roundToInt(lijn[2]*255)));
 	}
 	return image;
@@ -73,7 +64,7 @@ EasyImage simpleGenerations::generate_Eye(const ini::Configuration &configuratio
 						}
 					}
 	image=simpleGenerations::generate_QuarterCircle(configuration);
-	for(int i=0;i<lines;i++)
+	for(unsigned int i=0;i<lines;i++)
 	{			//image.draw_line(0,h*i,w*i,height-1,img::Color( roundToInt(lijn[0]*255),roundToInt(lijn[1]*255),roundToInt(lijn[2]*255)));
 		image.draw_line(width-1,(height-1)-h*i,(width-1)-w*i,0,img::Color( roundToInt(lijn[0]*255),roundToInt(lijn[1]*255),roundToInt(lijn[2]*255)));
 	}

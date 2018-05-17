@@ -10,6 +10,7 @@
 #include "vector3d.h"
 #include "figure3D.h"
 #include "Line2D.h"
+#include "To2DConverter.h"
 
 
 #include <iostream>
@@ -20,6 +21,13 @@
 
 typedef std::list<Line2D> Lines2D;
 
+
+
+inline int roundToInt(double d)
+{
+	int x = static_cast<int>(round(d));
+	return x;
+}
 Vector3D Light::getSourceVector(){
 	return Vector3D::point(0,0,0);
 }
@@ -60,38 +68,13 @@ void Light::MakeShadowMask(std::vector<figure3D>& figures){
 			b*eye;
 		}
 	}
-	Lines2D projectedImg=imgUtils::figuresToLines2D(figures,true);
+	Lines2D projectedImg=To2DConverter::figuresToLines2D(newfigures,true);
 	double size=shadowmask.zBuffer.size();
 	double xmax=std::numeric_limits<double>::min();
 	double xmin=std::numeric_limits<double>::max();
 	double ymax=std::numeric_limits<double>::min();
 	double ymin=std::numeric_limits<double>::max();
-	for(Line2D i:projectedImg){
-		if(i.p1.x>xmax){
-			xmax=i.p1.x;
-		}
-		if(i.p1.x<xmin){
-			xmin=i.p1.x;
-		}
-		if(i.p1.y>ymax){
-			ymax=i.p1.y;
-		}
-		if(i.p1.y<ymin){
-			ymin=i.p1.y;
-		}
-		if(i.p2.x>xmax){
-			xmax=i.p2.x;
-		}
-		if(i.p2.x<xmin){
-			xmin=i.p2.x;
-		}
-		if(i.p2.y>ymax){
-			ymax=i.p2.y;
-		}
-		if(i.p2.y<ymin){
-			ymin=i.p2.y;
-		}
-	}
+	To2DConverter::moveToPos(projectedImg,xmin,ymin,xmax,ymax);
 	double xrange=std::abs(xmax-xmin);
 	double yrange=std::abs(ymax-ymin);
 	double imagex=size*(xrange/std::max(xrange,yrange));
@@ -101,8 +84,73 @@ void Light::MakeShadowMask(std::vector<figure3D>& figures){
 	double DCy=d*(ymin+ymax)/2.0;
 	dx=(imagex/2.0)-DCx;
 	dy=(imagey/2.0)-DCy;
+	for(figure3D driehoek:figures){
+//		std::cout<<driehoek.points.size()<<" "<<driehoek.faces.size()<<std::endl;
+		std::vector<Vector3D> points=driehoek.points;
+		for(face3D driehoekFace:driehoek.faces){
+			std::vector<int> index=driehoekFace.pointsIndex;
+			this->ShadowMaskTriangle(points[index[0]],points[index[1]],points[index[2]]);
+		}
+	}
 }
 
-void Light::ShadowMAskTriangle(Vector3D const& A, Vector3D const& B, Vector3D const& C){
+void Light::ShadowMaskTriangle(Vector3D const& A, Vector3D const& B, Vector3D const& C){
+	Point2D A2=Point2D((d*A.x/(-A.z))+dx,(d*A.y/(-A.z))+dy);
+		Point2D B2=Point2D((d*B.x/(-B.z))+dx,(d*B.y/(-B.z))+dy);
+		Point2D C2=Point2D((d*C.x/(-C.z))+dx,(d*C.y/(-C.z))+dy);
+		double xg=(A2.x+B2.x+C2.x)/3.0;
+		double yg=(A2.y+B2.y+C2.y)/3.0;
+		double zg=(A.z+B.z+C.z)/3.0;
+		Vector3D u=B-A;
+		Vector3D v=C-A;
+		double w1=(u.y*v.z)-(u.z*v.y);
+		double w2=(u.z*v.x)-(u.x*v.z);
+		double w3=(u.x*v.y)-(u.y*v.x);
+		double k=w1*A.x+w2*A.y+w3*A.z;
+		if(k!=0){
+			double dzdx=w1/((-d)*k);
+			double dzdy=w2/((-d)*k);
+			for(double i=roundToInt(std::min(A2.y,std::min(B2.y,C2.y))+0.5);i<=roundToInt(std::max(A2.y,std::max(B2.y,C2.y))-0.5);i++){
+				double xrab=std::numeric_limits<double>::min();
+				double xrac=std::numeric_limits<double>::min();
+				double xrbc=std::numeric_limits<double>::min();
+				double xlab=std::numeric_limits<double>::max();
+				double xlac=std::numeric_limits<double>::max();
+				double xlbc=std::numeric_limits<double>::max();
+				//A=P B=Q
+				if((i-A2.y)*(i-B2.y)<=0){
+					if(A2.y!=B2.y){
+						xrab=B2.x+(A2.x-B2.x)*((i-B2.y)/(A2.y-B2.y));
+						xlab=xrab;
+					}
+				}
+	//			A=P C=Q
+				if((i-A2.y)*(i-C2.y)<=0){
+					if(A2.y!=C2.y){
+						xrac=C2.x+(A2.x-C2.x)*((i-C2.y)/(A2.y-C2.y));
+						xlac=xrac;
+					}
+				}
+				//B=P C=Q
+				if((i-B2.y)*(i-C2.y)<=0){
+					if(B2.y!=C2.y){
+						xrbc=C2.x+(B2.x-C2.x)*((i-C2.y)/(B2.y-C2.y));
+						xlbc=xrbc;
+					}
+				}
 
-}
+				double xl=round(std::min(xlab,std::min(xlac,xlbc))+0.5);
+				double xr=round(std::max(xrab,std::max(xrac,xrbc))-0.5);
+				xl=(xl>shadowmask.zBuffer.size())?shadowmask.zBuffer.size():xl;
+				xr=(xr<0)?0:xr;
+	//			std::cout<<xl<<" "<<xr<<std::endl;
+				for(unsigned int pix=xl;pix<=xr;pix++){
+					double z=(1/zg)+(pix-xg)*dzdx+(i-yg)*dzdy;
+					if(shadowmask.zBuffer.size()>pix&&shadowmask.zBuffer[pix].size()>i&&shadowmask.zBuffer[pix][i]>z){
+						shadowmask.zBuffer[pix][i]=z;
+					}
+				}
+			}
+		}
+
+	}

@@ -14,16 +14,10 @@ using namespace std;
 #include "Point2D.h"
 
 
-face3D::face3D() {
-	// TODO Auto-generated constructor stub
+face3D::face3D() {}
 
-}
+face3D::~face3D() {}
 
-face3D::~face3D() {
-	// TODO Auto-generated destructor stub
-}
-void face3D::addPoint(int p){ // @suppress("Member declaration not found")
+void face3D::addPoint(int p){
 	pointsIndex.push_back(p);
-
-
 }

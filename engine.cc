@@ -13,6 +13,7 @@
 #include "Engine3D.h"
 #include "Light.h"
 #include "Color.h"
+#include "To2DConverter.h"
 
 #include <fstream>
 #include <iostream>
@@ -53,11 +54,11 @@ img::EasyImage generate_image(const ini::Configuration &configuration)
 				return imgUtils::LinesToImg(configuration,lines);
 			}else if(typeString=="Wireframe"){
 				std::vector<figure3D> figures= engine3D.draw3D(configuration);
-				Lines2D lines=imgUtils::figuresToLines2D(figures);
+				Lines2D lines=To2DConverter::figuresToLines2D(figures);
 				return imgUtils::LinesToImg(configuration,lines);
 			}else if(typeString=="ZBufferedWireframe"){
 				std::vector<figure3D> figures= engine3D.draw3D(configuration);
-				Lines2D lines=imgUtils::figuresToLines2D(figures,true);
+				Lines2D lines=To2DConverter::figuresToLines2D(figures,true);
 				return imgUtils::LinesToImg(configuration,lines,true);
 			}else if(typeString=="ZBuffering"){
 				std::vector<figure3D> figures= engine3D.draw3D(configuration);

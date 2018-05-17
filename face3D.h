@@ -17,10 +17,28 @@
 class face3D {
 public:
 	std::vector<int> pointsIndex;
+
+	/**
+	 * \brief default constructor
+	 */
+
 	face3D();
+	/**
+	 * \brief constructor with pointindex
+	 * @param ps a vector of int that represent the indexes of the points
+	 */
 	face3D(std::vector<int> ps):pointsIndex(ps){}
+
+	/**
+	 * \brief default destructor
+	 */
 	virtual ~face3D();
 	face3D( const face3D & ) = default;
+
+	/**
+	 * \brief a function that adds a point
+	 * @param an int that is the index of the new point
+	 */
 	void addPoint(int p);
 };
 

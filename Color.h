@@ -13,9 +13,22 @@
 namespace figColor{
 	class Color {
 	public:
+		/**
+		 * \brief constructor that initialises all variabels
+		 *
+		 * @param r,g,b double that represent their repsectiee color
+		 */
 		Color(double r,double g,double b): red(r),green(g),blue(b){};
+
+		/**
+		 * \brief equality operators
+		 */
 		bool operator ==(const Color &b) const;
 		bool operator !=(const Color &b) const;
+
+		/**
+		 * \brief basic destructor
+		 */
 		virtual ~Color(){}
 		double red;
 		double green;

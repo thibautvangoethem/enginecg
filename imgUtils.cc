@@ -17,6 +17,8 @@
 #include "simpleGenerations.h"
 #include "ZBuffer.h"
 #include "Light.h"
+#include "To2DConverter.h"
+#include "Engine3D.h"
 
 #include <tgmath.h>
 #include <cstdlib>
@@ -33,19 +35,11 @@
 #include "imgUtils.h"
 using namespace img;
 typedef std::list<Line2D> Lines2D;
+
 inline int roundToInt(double d)
 {
 	int x = static_cast<int>(round(d));
 	return x;
-}
-
-imgUtils::imgUtils() {
-	// TODO Auto-generated constructor stub
-
-}
-
-imgUtils::~imgUtils() {
-	// TODO Auto-generated destructor stub
 }
 
 EasyImage imgUtils::LinesToImg(const ini::Configuration &configuration,Lines2D& lines,bool WithZBuf){
@@ -54,7 +48,7 @@ EasyImage imgUtils::LinesToImg(const ini::Configuration &configuration,Lines2D& 
 	double xmin=std::numeric_limits<double>::max();
 	double ymax=std::numeric_limits<double>::min();
 	double ymin=std::numeric_limits<double>::max();
-	imgUtils::moveToPos(lines,xmin,ymin,xmax,ymax);
+	To2DConverter::moveToPos(lines,xmin,ymin,xmax,ymax);
 	double imagex;
 	double imagey;
 	double size=configuration["General"]["size"].as_double_or_die();
@@ -105,131 +99,6 @@ EasyImage imgUtils::LinesToImg(const ini::Configuration &configuration,Lines2D& 
 
 	}
 	return image;
-
-}
-
-void imgUtils::moveToPos(Lines2D& lines,double& xmin,double& ymin,double& xmax,double& ymax){
-
-	for(Line2D i:lines){
-		if(i.p1.x>xmax){
-			xmax=i.p1.x;
-		}
-		if(i.p1.x<xmin){
-			xmin=i.p1.x;
-		}
-		if(i.p1.y>ymax){
-			ymax=i.p1.y;
-		}
-		if(i.p1.y<ymin){
-			ymin=i.p1.y;
-		}
-		if(i.p2.x>xmax){
-			xmax=i.p2.x;
-		}
-		if(i.p2.x<xmin){
-			xmin=i.p2.x;
-		}
-		if(i.p2.y>ymax){
-			ymax=i.p2.y;
-		}
-		if(i.p2.y<ymin){
-			ymin=i.p2.y;
-		}
-	}
-	if(xmin<0||ymin<0){
-		Lines2D nieuwLines;
-		if(xmin<0&&ymin>=0){
-			for(Line2D& line:lines){
-				double tempx1=line.p1.x-xmin;
-				double tempx2=line.p2.x-xmin;
-				line.setp1(tempx1,line.p1.y);
-				line.setp2(tempx2,line.p2.y);
-				continue;
-						}
-			xmax-=xmin;
-			xmin=0.0;
-		}else if(ymin<0&&xmin>=0){
-			for(Line2D& line:lines){
-				double tempy1=line.p1.y-ymin;
-				double tempy2=line.p2.y-ymin;
-				line.setp1(line.p1.x,tempy1);
-				line.setp2(line.p2.x,tempy2);
-				continue;
-			}
-			ymax-=ymin;
-			ymin=0.0;
-		}else if(ymin<0&&xmin<0){
-			for(Line2D& line:lines){
-				double tempy1=line.p1.y-ymin;
-				double tempy2=line.p2.y-ymin;
-				double tempx1=line.p1.x-xmin;
-				double tempx2=line.p2.x-xmin;
-				line.setp1(tempx1,tempy1);
-				line.setp2(tempx2,tempy2);
-				continue;
-			}
-			xmax-=xmin;
-			ymax-=ymin;
-			ymin=0.0;
-			xmin=0.0;
-		}
-
-	}
-}
-
-
-Lines2D imgUtils::figuresToLines2D(std::vector<figure3D> &figures,bool WithZBuffer){
-	Lines2D lines;
-	for(figure3D fig:figures){
-		std::vector<Point2D> projectedPoints;
-		std::vector<double> ZBufferVec;
-		for(Vector3D vec:fig.points){
-			projectedPoints.push_back(imgUtils::projectPoint(vec,1));
-			if(WithZBuffer){
-				ZBufferVec.push_back(vec.z);
-			}
-		}
-
-		for(face3D face:fig.faces){
-			for(unsigned int i=0;i<face.pointsIndex.size();i++){
-				if(WithZBuffer){
-					if(i==face.pointsIndex.size()-1){
-						lines.push_back(Line2D(projectedPoints[face.pointsIndex[i]],projectedPoints[face.pointsIndex[0]],
-						figColor::Color(roundToInt(fig.ambientReflection.red*255),roundToInt(fig.ambientReflection.green*255),roundToInt(fig.ambientReflection.blue*255))
-						,ZBufferVec[face.pointsIndex[i]],ZBufferVec[face.pointsIndex[0]]));
-					}else{
-						lines.push_back(Line2D(projectedPoints[face.pointsIndex[i]],projectedPoints[face.pointsIndex[i+1]],
-						figColor::Color(roundToInt(fig.ambientReflection.red*255),roundToInt(fig.ambientReflection.green*255),roundToInt(fig.ambientReflection.blue*255)),
-						ZBufferVec[face.pointsIndex[i]],ZBufferVec[face.pointsIndex[i+1]]));
-					}
-
-				}else{
-					if(i==face.pointsIndex.size()-1){
-						lines.push_back(Line2D(projectedPoints[face.pointsIndex[i]],projectedPoints[face.pointsIndex[0]],
-						figColor::Color(roundToInt(fig.ambientReflection.red*255),roundToInt(fig.ambientReflection.green*255),roundToInt(fig.ambientReflection.blue*255))));
-					}else{
-						lines.push_back(Line2D(projectedPoints[face.pointsIndex[i]],projectedPoints[face.pointsIndex[i+1]],
-						figColor::Color(roundToInt(fig.ambientReflection.red*255),roundToInt(fig.ambientReflection.green*255),roundToInt(fig.ambientReflection.blue*255))));
-					}
-				}
-			}
-		}
-	}
-	return lines;
-}
-
-
-Point2D imgUtils::projectPoint(const Vector3D &point,const double d){
-	double x;
-	double y;
-	if(point.z==0){
-		x= d*point.x/-1.0;
-		y= d*point.y/-1.0;
-	}else{
-		x= d*point.x/-point.z;
-		y= d*point.y/-point.z;
-	}
-	return Point2D(x,y);
 
 }
 
@@ -325,7 +194,7 @@ double imgUtils::calculateZFactor(double za,double zb,double i,double a){
 }
 
 EasyImage imgUtils::TrianglesToImg(const ini::Configuration &configuration,std::vector<figure3D>& figures,bool WithZBuf,std::vector<Light*>& Lights){
-	Lines2D projectedImg=imgUtils::figuresToLines2D(figures,WithZBuf);
+	Lines2D projectedImg=To2DConverter::figuresToLines2D(figures,WithZBuf);
 	double size=configuration["General"]["size"].as_double_or_die();
 	double xmax=std::numeric_limits<double>::min();
 	double xmin=std::numeric_limits<double>::max();
@@ -373,9 +242,14 @@ EasyImage imgUtils::TrianglesToImg(const ini::Configuration &configuration,std::
 	if(WithZBuf){
 		zbuf=ZBuffer(roundToInt(imagey),roundToInt(imagex));
 	}
-	for(auto& light:Lights){
-
-		light->MakeShadowMask(figures);
+	bool withShadow=false;
+	bool shadowExists=configuration["General"]["shadowEnabled"].as_bool_if_exists(withShadow);
+	if(shadowExists&&withShadow){
+		for(unsigned int i=0;i<Lights.size();i++){
+			if(Lights[i]->getSourceVector().is_point()){
+				Lights[i]->MakeShadowMask(figures);
+			}
+		}
 	}
 	for(figure3D driehoek:figures){
 //		std::cout<<driehoek.points.size()<<" "<<driehoek.faces.size()<<std::endl;
@@ -384,7 +258,8 @@ EasyImage imgUtils::TrianglesToImg(const ini::Configuration &configuration,std::
 			for(face3D driehoekFace:driehoek.faces){
 				std::vector<int> index=driehoekFace.pointsIndex;
 				imgUtils::draw_zbuf_triag(zbuf,image,points[index[0]],points[index[1]],points[index[2]],d,dx,dy,
-						driehoek.ambientReflection,driehoek.difusseReflection,driehoek.specularReflection,driehoek.reflectionCoefficient,Lights);
+						driehoek.ambientReflection,driehoek.difusseReflection,driehoek.specularReflection,driehoek.reflectionCoefficient,Lights,
+						configuration, withShadow);
 			}
 		}
 	}
@@ -397,7 +272,9 @@ void imgUtils::draw_zbuf_triag(ZBuffer& buf, img::EasyImage& image,
 		figColor::Color& ambientReflection,
 		figColor::Color& diffuseReflection,
 		figColor::Color& specularReflection, double reflectionCoeff,
-		std::vector<Light*>& lights){
+		std::vector<Light*>& lights,
+		const ini::Configuration &configuration,
+		bool withShadow){
 
 	Point2D A2=Point2D((d*A.x/(-A.z))+dx,(d*A.y/(-A.z))+dy);
 	Point2D B2=Point2D((d*B.x/(-B.z))+dx,(d*B.y/(-B.z))+dy);
@@ -474,36 +351,86 @@ void imgUtils::draw_zbuf_triag(ZBuffer& buf, img::EasyImage& image,
 			xl=(xl>buf.zBuffer.size())?buf.zBuffer.size():xl;
 			xr=(xr<0)?0:xr;
 //			std::cout<<xl<<" "<<xr<<std::endl;
-			for(int pix=xl;pix<=xr;pix++){
+			for(unsigned int pix=xl;pix<=xr;pix++){
 				double redp=redd;
 				double greenp=greend;
 				double bluep=blued;
 				double z=(1/zg)+(pix-xg)*dzdx+(i-yg)*dzdy;
+				Vector3D point=Vector3D::point(((pix-dx)*-(1/z))/d,((i-dy)*-(1/z))/d,1/z);
+				std::vector<double> eyeCoords=configuration["General"]["eye"].as_double_tuple_or_die();
+				Vector3D eyeVector=Vector3D::vector(eyeCoords[0],eyeCoords[1],eyeCoords[2]);
+				Matrix eyeMatrix=Engine3D::eyePointTrans(eyeVector);
+				eyeMatrix=eyeMatrix.inv(eyeMatrix);
+				Vector3D shadowPoint=point*eyeMatrix;
 				if(buf.zBuffer.size()>pix&&buf.zBuffer[pix].size()>i&&buf.zBuffer[pix][i]>z){
 					buf.zBuffer[pix][i]=z;
 					for(auto light:lights){
-						Vector3D ld=light->getSourceVector();
-						Vector3D point=Vector3D::point(((pix-dx)*-(1/z))/d,((i-dy)*-(1/z))/d,1/z);
-						Vector3D l=(ld.is_point())?ld-point:-ld;
-						l.normalise();
-						double cosAlpha=n.dot(l);
-		//				std::cout<<cosAlpha<<std::endl;
-						if(cosAlpha>0&&ld.is_point()){
-							redp+=light->diffuseLight.red*diffuseReflection.red*cosAlpha;
-							greenp+=light->diffuseLight.green*diffuseReflection.green*cosAlpha;
-							bluep+=light->diffuseLight.blue*diffuseReflection.blue*cosAlpha;
+						if(!withShadow){
+							Vector3D ld=light->getSourceVector();
+
+							Vector3D l=(ld.is_point())?ld-point:-ld;
+							l.normalise();
+							double cosAlpha=n.dot(l);
+			//				std::cout<<cosAlpha<<std::endl;
+							if(cosAlpha>0&&ld.is_point()){
+								redp+=light->diffuseLight.red*diffuseReflection.red*cosAlpha;
+								greenp+=light->diffuseLight.green*diffuseReflection.green*cosAlpha;
+								bluep+=light->diffuseLight.blue*diffuseReflection.blue*cosAlpha;
+							}
+							Vector3D r=(2*cosAlpha*n)-l;
+							r.normalise();
+							Vector3D toEye=-point;
+							toEye.normalise();
+							double cosBeta=r.dot(toEye);
+							if(cosBeta>=0){
+								redp+= light->specularLight.red*specularReflection.red*pow(cosBeta,reflectionCoeff);
+								greenp+= light->specularLight.green*specularReflection.green*pow(cosBeta,reflectionCoeff);
+								bluep+= light->specularLight.blue*specularReflection.blue*pow(cosBeta,reflectionCoeff);
+							}
+						}else{
+							Vector3D ld=light->getSourceVector();
+							bool isShadow=false;
+							if(ld.is_point()){
+								Vector3D lightpoint=point*light->eye;
+								int xl=light->d*lightpoint.x/(-lightpoint.z);
+								int yl=light->d*lightpoint.y/(-lightpoint.z);
+								double za=light->shadowmask.zBuffer[int(floor(xl))][int(floor(yl))];
+								double zb=light->shadowmask.zBuffer[int(ceil(xl))][int(floor(yl))];
+								double zc=light->shadowmask.zBuffer[int(floor(xl))][int(ceil(yl))];
+								double zd=light->shadowmask.zBuffer[int(ceil(xl))][int(ceil(yl))];
+								double ax=xl-int(floor(xl));
+								double ay=ay-int(floor(ay));
+								double ze=(1-ax)*za+ax*zb;
+								double zf=(1-ax)*zc+ax*zd;
+								double depth=(1-ay)*ze+ay*zf;
+								if(za==depth){
+									isShadow=true;
+								}
+
+							}
+							if(!isShadow){
+								Vector3D l=(ld.is_point())?ld-point:-ld;
+								l.normalise();
+								double cosAlpha=n.dot(l);
+				//				std::cout<<cosAlpha<<std::endl;
+								if(cosAlpha>0&&ld.is_point()){
+									redp+=light->diffuseLight.red*diffuseReflection.red*cosAlpha;
+									greenp+=light->diffuseLight.green*diffuseReflection.green*cosAlpha;
+									bluep+=light->diffuseLight.blue*diffuseReflection.blue*cosAlpha;
+								}
+								Vector3D r=(2*cosAlpha*n)-l;
+								r.normalise();
+								Vector3D toEye=-point;
+								toEye.normalise();
+								double cosBeta=r.dot(toEye);
+								if(cosBeta>=0){
+									redp+= light->specularLight.red*specularReflection.red*pow(cosBeta,reflectionCoeff);
+									greenp+= light->specularLight.green*specularReflection.green*pow(cosBeta,reflectionCoeff);
+									bluep+= light->specularLight.blue*specularReflection.blue*pow(cosBeta,reflectionCoeff);
+								}
+							}
 						}
-						Vector3D r=(2*cosAlpha*n)-l;
-						r.normalise();
-						Vector3D toEye=-point;
-						toEye.normalise();
-						double cosBeta=r.dot(toEye);
-						if(cosBeta>=0){
-							redp+= light->specularLight.red*specularReflection.red*pow(cosBeta,reflectionCoeff);
-							greenp+= light->specularLight.green*specularReflection.green*pow(cosBeta,reflectionCoeff);
-							bluep+= light->specularLight.blue*specularReflection.blue*pow(cosBeta,reflectionCoeff);
-						}
-						}
+					}
 					if(redp>1){
 						redp=1;
 					}

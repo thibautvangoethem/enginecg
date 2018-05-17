@@ -14,8 +14,12 @@ class figure3D;
 
 class L3DEngine {
 public:
-	L3DEngine();
-	virtual ~L3DEngine();
+
+	/**
+	 * \brief a function that reads and executesa l3D system and turns it into a 3D figure
+	 * @param configuration the config containting the l3d system
+	 * @param figcount the place of the figure in the config
+	 */
 	static figure3D L3D_ToFigure(const ini::Configuration &configuration, int figcount);
 };
 

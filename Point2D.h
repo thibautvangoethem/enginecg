@@ -11,11 +11,28 @@
 
 class Point2D {
 public:
-	Point2D(double xco,double yxo):x(xco),y(yxo){};
-	virtual ~Point2D(){}
 	double x;
 	double y;
+
+	/**
+	 * \brief constructor for a point that initalizes everything
+	 * @param xco,yxo the two coordinates
+	 */
+	Point2D(double xco,double yxo):x(xco),y(yxo){};
+
+	/**
+	 * \brief default destructor
+	 */
+	virtual ~Point2D(){}
+
+	/**
+	 * \brief getter for x-coordinate
+	 */
 	double getx();
+
+	/**
+	 * \brief getter for y-coordinate
+	 */
 	double gety();
 };
 
