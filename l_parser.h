@@ -20,6 +20,7 @@
 #define L_PARSER_INCLUDED
 
 #include <map>
+#include <vector>
 #include <string>
 #include <set>
 #include <exception>
@@ -182,12 +183,14 @@ namespace LParser
 		        /**
 		         * \brief the replacement rules of the l-system
 		         */
-			std::map<char, std::string> replacementrules;
+			std::map<char,std::vector<std::string> > replacementrules;
 
 		        /**
 		         * \brief the number of replacements of the l-system
 		         */
 			unsigned int nrIterations;
+
+
 	};
 
 

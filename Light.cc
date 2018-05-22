@@ -40,6 +40,18 @@ Vector3D PointLight::getSourceVector(){
 	return PointLight::location;
 }
 
+void Light::setSourceVector(Vector3D vec){
+	vec.x+=1;
+}
+
+void InfLight::setSourceVector(Vector3D vec){
+	ldVector=vec;
+}
+
+void PointLight::setSourceVector(Vector3D vec){
+	location=vec;
+}
+
 Matrix Light::eyepointtrans(Vector3D eyepoint){
 	double r;
 	double theta;
@@ -65,7 +77,7 @@ void Light::MakeShadowMask(std::vector<figure3D>& figures){
 	std::vector<figure3D> newfigures=figures;
 	for(figure3D& i:newfigures){
 		for(auto& b:i.points){
-			b*eye;
+			b=b*eye;
 		}
 	}
 	Lines2D projectedImg=To2DConverter::figuresToLines2D(newfigures,true);
@@ -79,6 +91,7 @@ void Light::MakeShadowMask(std::vector<figure3D>& figures){
 	double yrange=std::abs(ymax-ymin);
 	double imagex=size*(xrange/std::max(xrange,yrange));
 	double imagey=size*(yrange/std::max(xrange,yrange));
+	shadowmask=ZBuffer(imagex,imagey);
 	d=0.95*(imagex/xrange);
 	double DCx=d*(xmin+xmax)/2.0;
 	double DCy=d*(ymin+ymax)/2.0;
@@ -139,15 +152,16 @@ void Light::ShadowMaskTriangle(Vector3D const& A, Vector3D const& B, Vector3D co
 					}
 				}
 
-				double xl=round(std::min(xlab,std::min(xlac,xlbc))+0.5);
-				double xr=round(std::max(xrab,std::max(xrac,xrbc))-0.5);
+				double xl=round(std::min(xlab,std::min(xlac,xlbc)));
+				double xr=round(std::max(xrab,std::max(xrac,xrbc)));
 				xl=(xl>shadowmask.zBuffer.size())?shadowmask.zBuffer.size():xl;
 				xr=(xr<0)?0:xr;
-	//			std::cout<<xl<<" "<<xr<<std::endl;
+//				std::cout<<xl<<" "<<xr<<std::endl;
 				for(unsigned int pix=xl;pix<=xr;pix++){
 					double z=(1/zg)+(pix-xg)*dzdx+(i-yg)*dzdy;
 					if(shadowmask.zBuffer.size()>pix&&shadowmask.zBuffer[pix].size()>i&&shadowmask.zBuffer[pix][i]>z){
 						shadowmask.zBuffer[pix][i]=z;
+//						std::cout<<pix<<" "<<i<<std::endl;
 					}
 				}
 			}

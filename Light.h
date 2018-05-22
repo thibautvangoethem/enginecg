@@ -54,6 +54,11 @@ class Light {
 	virtual Vector3D getSourceVector();
 
 	/**
+	 * \brief a function that sets the source vector, should be overwritten in the inhereted classes
+	 */
+	virtual void setSourceVector(Vector3D vec);
+
+	/**
 	 * \brief a function that makes the shadowmask for this light
 	 * @param figures all the figures that are used to create the shadowmask
 	 */
@@ -82,7 +87,13 @@ class InfLight: public Light
 	 */
 	InfLight(figColor::Color am,figColor::Color diff,figColor::Color spec,Vector3D ld):Light(am,diff,spec),ldVector(ld){};
 
+	~InfLight(){};
+
 	Vector3D getSourceVector() override;
+
+
+	void setSourceVector(Vector3D vec) override;
+
 };
 
 class PointLight: public Light
@@ -97,7 +108,12 @@ class PointLight: public Light
 		eye=Light::eyepointtrans(location);
 	};
 
+	~PointLight(){};;
 
 	Vector3D getSourceVector() override;
+
+	void setSourceVector(Vector3D vec) override;
+
+
 };
 #endif /* LIGHT_H_ */

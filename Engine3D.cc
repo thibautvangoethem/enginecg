@@ -690,8 +690,8 @@ std::vector<Light*> Engine3D::readLights(const ini::Configuration &configuration
 				bool withShadow=false;
 				bool shadowExists=configuration["General"]["shadowEnabled"].as_bool_if_exists(withShadow);
 				if(shadowExists&&withShadow){
-					int shadowmask=configuration["General"]["shadowMask"].as_int_or_die();
-					l->shadowmask=ZBuffer(shadowmask,shadowmask);
+									int shadowmask=configuration["General"]["shadowMask"].as_int_or_die();
+				l->shadowmask=ZBuffer(shadowmask,shadowmask);
 				}
 				lights.push_back(l);
 			}

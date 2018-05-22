@@ -35,7 +35,6 @@ img::EasyImage generate_image(const ini::Configuration &configuration)
 	simpleGenerations simple;
 	L2DEngine l2dengine;
 	Engine3D engine3D;
-	[](){};
 			if(typeString== "IntroColorRectangle"){
 				return simple.generate_ColorRectangle(configuration);
 			}else if(typeString== "IntroBlocks"){
@@ -80,8 +79,8 @@ img::EasyImage generate_image(const ini::Configuration &configuration)
 				}
 				std::vector<Light*> lights=Engine3D::readLights(configuration);
 				EasyImage img= imgUtils::TrianglesToImg(configuration,figures,true,lights);
-				for(auto i:lights){
-					delete i;
+				for(unsigned int i=0;i<lights.size();i++){
+					delete lights[i];
 				}
 				return img;
 
@@ -151,7 +150,7 @@ int main(int argc, char const* argv[])
     		//Basically this return value tells our automated test scripts to run your engine on a pc with more memory.
     		//(Unless of course you are already consuming the maximum allowed amount of memory)
     		//If your engine does NOT adhere to this requirement you risk losing points because then our scripts will
-		//mark the test as failed while in reality it just needed a bit more memory
+        	//mark the test as failed while in reality it just needed a bit more memory
                 std::cerr << "Error: insufficient memory" << std::endl;
                 retVal = 100;
         }

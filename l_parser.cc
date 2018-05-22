@@ -18,13 +18,14 @@
 
 #include "l_parser.h"
 
+#include <stdio.h>
 #include <assert.h>
 #include <iostream>
 #include <iomanip>
 #include <cctype>
 #include <sstream>
-
-
+#include <stdlib.h>
+#include <time.h>
 
 namespace
 {
@@ -342,7 +343,8 @@ namespace
 		}
 		return num_parenthesis == 0;
 	}
-	void parse_rules(std::set<char> const& alphabet, std::map<char, std::string>& rules, stream_parser& parser, bool parse2D)
+
+	void parse_rules(std::set<char> const& alphabet, std::map<char, std::vector<std::string>>& rules, stream_parser& parser, bool parse2D)
 	{
 		parser.skip_comments_and_whitespace();
 		parser.assertChars("Rules");
@@ -359,8 +361,6 @@ namespace
 				throw LParser::ParserException("Invalid Alphabet character", parser.getLine(), parser.getCol());
 			if (alphabet.find(c) == alphabet.end())
 				throw LParser::ParserException(std::string("Replacement rule specified for char '") + c + "' which is not part of the alphabet. ", parser.getLine(), parser.getCol());
-			if (rules.find(c) != rules.end())
-				throw LParser::ParserException(std::string("Double entry '") + c + "' in rules specification ", parser.getLine(), parser.getCol());
 			char alphabet_char = c;
 			parser.skip_comments_and_whitespace();
 			parser.assertChars("->");
@@ -368,7 +368,11 @@ namespace
 			std::string rule = parser.readQuotedString();
 			if (!isValidRule(alphabet, rule, parse2D))
 				throw LParser::ParserException(std::string("Invalid rule specification for entry '") + alphabet_char + "' in rule specification", parser.getLine(), parser.getCol());
-			rules[alphabet_char] = rule;
+			if(rules.find(alphabet_char)!=rules.end()){
+				rules[alphabet_char].push_back(rule);
+			}else{
+				rules[alphabet_char]= {rule};
+			}
 			parser.skip_comments_and_whitespace();
 			c = parser.getChar();
 			if (c == '}')
@@ -485,8 +489,11 @@ bool LParser::LSystem::draw(char c) const
 }
 std::string const& LParser::LSystem::get_replacement(char c) const
 {
+	srand(time(NULL)*rand()%100);
 	assert(get_alphabet().find(c) != get_alphabet().end());
-	return replacementrules.find(c)->second;
+	int lenght=replacementrules.find(c)->second.size();
+	int random=rand()%lenght;
+	return replacementrules.find(c)->second[random];
 }
 double LParser::LSystem::get_angle() const
 {

@@ -24,7 +24,7 @@ public:
 	 * \brief a function that take a configuration with a l2d system and turns it into lines
 	 * @param configuration the config containing the l2d system
 	 */
-	Lines2D L2D_ToLines(const ini::Configuration &configuration); // converts a .L2D file into a list of lines if it is parsed correctly
+	static Lines2D L2D_ToLines(const ini::Configuration &configuration); // converts a .L2D file into a list of lines if it is parsed correctly
 };
 
 

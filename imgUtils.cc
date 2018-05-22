@@ -32,6 +32,7 @@
 #include <list>
 #include <utility>
 #include <limits>
+#include <fstream>
 #include "imgUtils.h"
 using namespace img;
 typedef std::list<Line2D> Lines2D;
@@ -51,6 +52,12 @@ EasyImage imgUtils::LinesToImg(const ini::Configuration &configuration,Lines2D& 
 	To2DConverter::moveToPos(lines,xmin,ymin,xmax,ymax);
 	double imagex;
 	double imagey;
+	if(imagex<1){
+		imagex=1;
+	}
+	if(imagey<1){
+		imagey=1;
+	}
 	double size=configuration["General"]["size"].as_double_or_die();
 	if(xmax>ymax){
 		imagex=size*((xmax-xmin)/xmax);
@@ -290,6 +297,7 @@ void imgUtils::draw_zbuf_triag(ZBuffer& buf, img::EasyImage& image,
 	Vector3D n=Vector3D::vector(w1,w2,w3);
 	n.normalise();
 	double k=w1*A.x+w2*A.y+w3*A.z;
+
 	if(k!=0){
 
 		//bereken kleuren die op heel het vlak werken
@@ -317,6 +325,7 @@ void imgUtils::draw_zbuf_triag(ZBuffer& buf, img::EasyImage& image,
 
 		double dzdx=w1/((-d)*k);
 		double dzdy=w2/((-d)*k);
+
 		for(double i=roundToInt(std::min(A2.y,std::min(B2.y,C2.y))+0.5);i<=roundToInt(std::max(A2.y,std::max(B2.y,C2.y))-0.5);i++){
 			double xrab=std::numeric_limits<double>::min();
 			double xrac=std::numeric_limits<double>::min();
@@ -351,6 +360,7 @@ void imgUtils::draw_zbuf_triag(ZBuffer& buf, img::EasyImage& image,
 			xl=(xl>buf.zBuffer.size())?buf.zBuffer.size():xl;
 			xr=(xr<0)?0:xr;
 //			std::cout<<xl<<" "<<xr<<std::endl;
+
 			for(unsigned int pix=xl;pix<=xr;pix++){
 				double redp=redd;
 				double greenp=greend;
@@ -361,10 +371,15 @@ void imgUtils::draw_zbuf_triag(ZBuffer& buf, img::EasyImage& image,
 				Vector3D eyeVector=Vector3D::vector(eyeCoords[0],eyeCoords[1],eyeCoords[2]);
 				Matrix eyeMatrix=Engine3D::eyePointTrans(eyeVector);
 				eyeMatrix=eyeMatrix.inv(eyeMatrix);
+
+//				Vecotr3D eyepoint=Vecotr3D::point()
 				Vector3D shadowPoint=point*eyeMatrix;
+//				std::cout<<pix<<" "<<i<<" "<<buf.zBuffer.size()<<" "<<buf.zBuffer[pix].size()<<" "<<buf.zBuffer[pix][i]<<" "<<z<<std::endl;
 				if(buf.zBuffer.size()>pix&&buf.zBuffer[pix].size()>i&&buf.zBuffer[pix][i]>z){
 					buf.zBuffer[pix][i]=z;
+//					std::cout<<"ik geraak hier1"<<std::endl;
 					for(auto light:lights){
+//						std::cout<<"ik geraak hier3"<<std::endl;
 						if(!withShadow){
 							Vector3D ld=light->getSourceVector();
 
@@ -388,23 +403,30 @@ void imgUtils::draw_zbuf_triag(ZBuffer& buf, img::EasyImage& image,
 								bluep+= light->specularLight.blue*specularReflection.blue*pow(cosBeta,reflectionCoeff);
 							}
 						}else{
+//							std::cout<<"ik geraak hier4"<<std::endl;
 							Vector3D ld=light->getSourceVector();
 							bool isShadow=false;
 							if(ld.is_point()){
+//								std::cout<<"ik geraak hier5"<<std::endl;
 								Vector3D lightpoint=point*light->eye;
-								int xl=light->d*lightpoint.x/(-lightpoint.z);
-								int yl=light->d*lightpoint.y/(-lightpoint.z);
-								double za=light->shadowmask.zBuffer[int(floor(xl))][int(floor(yl))];
-								double zb=light->shadowmask.zBuffer[int(ceil(xl))][int(floor(yl))];
-								double zc=light->shadowmask.zBuffer[int(floor(xl))][int(ceil(yl))];
-								double zd=light->shadowmask.zBuffer[int(ceil(xl))][int(ceil(yl))];
-								double ax=xl-int(floor(xl));
-								double ay=ay-int(floor(ay));
-								double ze=(1-ax)*za+ax*zb;
-								double zf=(1-ax)*zc+ax*zd;
-								double depth=(1-ay)*ze+ay*zf;
-								if(za==depth){
-									isShadow=true;
+								double xl=(light->d*lightpoint.x/(-lightpoint.z))+light->dx;
+								double yl=(light->d*lightpoint.y/(-lightpoint.z))+light->dy;
+//								std::cout<<"ik geraak hier6"<<std::endl;
+								if(xl>0&&yl>0){
+//									std::cout<<"ik geraak hier7"<<std::endl;
+//									std::cout<<xl<<" "<<yl<<std::endl;
+									double za=light->shadowmask.zBuffer[int(floor(xl))][int(floor(yl))];
+									double zb=light->shadowmask.zBuffer[int(ceil(xl))][int(floor(yl))];
+									double zc=light->shadowmask.zBuffer[int(floor(xl))][int(ceil(yl))];
+									double zd=light->shadowmask.zBuffer[int(ceil(xl))][int(ceil(yl))];
+									double ax=xl-int(floor(xl));
+									double ay=ay-int(floor(ay));
+									double ze=(1-ax)*za+ax*zb;
+									double zf=(1-ax)*zc+ax*zd;
+									double depth=(1-ay)*ze+ay*zf;
+									if(za==depth){
+										isShadow=true;
+									}
 								}
 
 							}
@@ -443,12 +465,12 @@ void imgUtils::draw_zbuf_triag(ZBuffer& buf, img::EasyImage& image,
 					int red=roundToInt(redp*255);
 					int green=roundToInt(greenp*255);
 					int blue=roundToInt(bluep*255);
+//					std::cout<<pix<<" "<<i<<std::endl;
 					image(pix, i) = Color(red,green,blue);
 				}
 			}
 		}
 	}
-
 }
 
 bool imgUtils::isTriangle(figure3D fig){
