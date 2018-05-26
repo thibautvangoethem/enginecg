@@ -273,6 +273,165 @@ EasyImage imgUtils::TrianglesToImg(const ini::Configuration &configuration,std::
 	return image;
 }
 
+figColor::Color imgUtils::CalculateFaceColor(std::vector<Light*>& lights,Vector3D& n,figColor::Color& ambientReflection,figColor::Color& diffuseReflection){
+	double redd=0;
+	double greend=0;
+	double blued=0;
+	for(auto i:lights){
+		redd+=i->ambientLight.red*ambientReflection.red;
+		greend+=i->ambientLight.green*ambientReflection.green;
+		blued+=i->ambientLight.blue*ambientReflection.blue;
+		if(i->diffuseLight!=figColor::Color(0,0,0)){
+			Vector3D ld=i->getSourceVector();
+			if(ld.is_vector()){
+				Vector3D l=-ld;
+				l.normalise();
+				double cosAlpha=n.dot(l);
+				if(cosAlpha>0){
+					redd+=i->diffuseLight.red*diffuseReflection.red*cosAlpha;
+					greend+=i->diffuseLight.green*diffuseReflection.green*cosAlpha;
+					blued+=i->diffuseLight.blue*diffuseReflection.blue*cosAlpha;
+				}
+			}
+		}
+	}
+	return figColor::Color(redd,greend,blued);
+}
+
+figColor::Color imgUtils::CalculatePixelColor(std::vector<Light*>& lights,Vector3D& point,
+		Vector3D& n,figColor::Color& faceColor,figColor::Color& diffuseReflection,figColor::Color& specularReflection,
+		double reflectionCoeff,bool withShadow, std::vector<double>eyeCoords){
+	double redp=faceColor.red;
+	double greenp=faceColor.green;
+	double bluep=faceColor.blue;
+	Vector3D eyeVector=Vector3D::vector(eyeCoords[0],eyeCoords[1],eyeCoords[2]);
+	Matrix eyeMatrix=Engine3D::eyePointTrans(eyeVector);
+	eyeMatrix=eyeMatrix.inv(eyeMatrix);
+
+//  Vecotr3D eyepoint=Vecotr3D::point()
+	Vector3D shadowPoint=point*eyeMatrix;
+// std::cout<<pix<<" "<<i<<" "<<buf.zBuffer.size()<<" "<<buf.zBuffer[pix].size()<<" "<<buf.zBuffer[pix][i]<<" "<<z<<std::endl;
+	for(auto light:lights){
+//			std::cout<<"ik geraak hier3"<<std::endl;
+		if(!withShadow){
+			Vector3D ld=light->getSourceVector();
+			Vector3D l=(ld.is_point())?ld-point:-ld;
+			l.normalise();
+			double cosAlpha=n.dot(l);
+//				std::cout<<cosAlpha<<std::endl;
+			if(cosAlpha>0&&ld.is_point()){
+				redp+=light->diffuseLight.red*diffuseReflection.red*cosAlpha;
+				greenp+=light->diffuseLight.green*diffuseReflection.green*cosAlpha;
+				bluep+=light->diffuseLight.blue*diffuseReflection.blue*cosAlpha;
+			}
+			Vector3D r=(2*cosAlpha*n)-l;
+			r.normalise();
+			Vector3D toEye=-point;
+			toEye.normalise();
+			double cosBeta=r.dot(toEye);
+			if(cosBeta>=0){
+				redp+= light->specularLight.red*specularReflection.red*pow(cosBeta,reflectionCoeff);
+				greenp+= light->specularLight.green*specularReflection.green*pow(cosBeta,reflectionCoeff);
+				bluep+= light->specularLight.blue*specularReflection.blue*pow(cosBeta,reflectionCoeff);
+			}
+		}else{
+//							std::cout<<"ik geraak hier4"<<std::endl;
+			Vector3D ld=light->getSourceVector();
+			if(imgUtils::CheckShadow(light,point)){
+				Vector3D l=(ld.is_point())?ld-point:-ld;
+				l.normalise();
+				double cosAlpha=n.dot(l);
+//				std::cout<<cosAlpha<<std::endl;
+				if(cosAlpha>0&&ld.is_point()){
+					redp+=light->diffuseLight.red*diffuseReflection.red*cosAlpha;
+					greenp+=light->diffuseLight.green*diffuseReflection.green*cosAlpha;
+					bluep+=light->diffuseLight.blue*diffuseReflection.blue*cosAlpha;
+				}
+				Vector3D r=(2*cosAlpha*n)-l;
+				r.normalise();
+				Vector3D toEye=-point;
+				toEye.normalise();
+				double cosBeta=r.dot(toEye);
+				if(cosBeta>=0){
+					redp+= light->specularLight.red*specularReflection.red*pow(cosBeta,reflectionCoeff);
+					greenp+= light->specularLight.green*specularReflection.green*pow(cosBeta,reflectionCoeff);
+					bluep+= light->specularLight.blue*specularReflection.blue*pow(cosBeta,reflectionCoeff);
+				}
+			}
+		}
+	}
+	if(redp>1){
+		redp=1;
+	}
+	if(greenp>1){
+		greenp=1;
+	}
+	if(bluep>1){
+		bluep=1;
+	}
+	return figColor::Color(redp,greenp,bluep);
+//		std::cout<<pix<<" "<<i<<std::endl;
+
+}
+
+bool imgUtils::CheckShadow(Light* light,Vector3D& point){
+	Vector3D ld=light->getSourceVector();
+	bool isShadow=false;
+//	std::cout<<point.x<<" "<<point.y<<" "<<point.y<<std::endl;
+	if(ld.is_point()){
+//		std::cout<<"ik geraak hier5"<<std::endl;
+		Vector3D lightpoint=point*light->eye;
+		double xl=(light->d*lightpoint.x/(-lightpoint.z))+light->dx;
+		double yl=(light->d*lightpoint.y/(-lightpoint.z))+light->dy;
+//      std::cout<<"ik geraak hier6"<<std::endl;
+		if(xl>0&&yl>0){
+//		std::cout<<"ik geraak hier7"<<std::endl;
+//		std::cout<<xl<<" "<<yl<<std::endl;
+			unsigned int fxl=floor(xl);
+			unsigned int fyl=floor(yl);
+			unsigned int cxl=ceil(xl);
+			unsigned int cyl=ceil(yl);
+//			std::cout<<xl<<" "<<yl<<std::endl;
+//			std::cout<<fxl<<" "<<cxl<<" "<<fyl<<" "<<cyl<<std::endl;
+			if(cxl>=light->shadowmask.zBuffer.size()){
+				cxl=light->shadowmask.zBuffer.size()-1;
+			}
+			if(cyl>=light->shadowmask.zBuffer[0].size()){
+				cyl=light->shadowmask.zBuffer[0].size()-1;
+			}
+			if(fxl>=light->shadowmask.zBuffer.size()){
+				fxl=light->shadowmask.zBuffer.size()-1;
+			}
+			if(fyl>=light->shadowmask.zBuffer[0].size()){
+				fyl=light->shadowmask.zBuffer[0].size()-1;
+			}
+//			std::cout<<light->shadowmask.zBuffer.size()<<" "<<light->shadowmask.zBuffer[0].size()<<std::endl;
+//			std::cout<<fxl<<" "<<cxl<<" "<<fyl<<" "<<cyl<<std::endl;
+//			std::cout<<light->shadowmask.zBuffer[fxl].size()<<std::endl;
+			double za=light->shadowmask.zBuffer[fxl][fyl];
+			if(za>1)za=0;
+			double zb=light->shadowmask.zBuffer[cxl][fyl];
+			if(zb>1)zb=0;
+
+			double zc=light->shadowmask.zBuffer[fxl][cyl];
+			if(zc>1)zc=0;
+			double zd=light->shadowmask.zBuffer[cxl][cyl];
+			if(zd>1)zd=0;
+
+			double ax=xl-int(floor(xl));
+			double ay=yl-int(floor(yl));
+			double ze=(1-ax)*za+ax*zb;
+			double zf=(1-ax)*zc+ax*zd;
+			double depth=(1-ay)*ze+ay*zf;
+			if(za==depth){
+				isShadow=true;
+			}
+		}
+
+	}
+	return !isShadow;
+}
+
 void imgUtils::draw_zbuf_triag(ZBuffer& buf, img::EasyImage& image,
 		Vector3D const& A, Vector3D const& B, Vector3D const& C,
 		double d, double dx, double dy,
@@ -299,30 +458,8 @@ void imgUtils::draw_zbuf_triag(ZBuffer& buf, img::EasyImage& image,
 	double k=w1*A.x+w2*A.y+w3*A.z;
 
 	if(k!=0){
-
 		//bereken kleuren die op heel het vlak werken
-			double redd=0;
-			double greend=0;
-			double blued=0;
-			for(auto i:lights){
-				redd+=i->ambientLight.red*ambientReflection.red;
-				greend+=i->ambientLight.green*ambientReflection.green;
-				blued+=i->ambientLight.blue*ambientReflection.blue;
-				if(i->diffuseLight!=figColor::Color(0,0,0)){
-					Vector3D ld=i->getSourceVector();
-					if(ld.is_vector()){
-						Vector3D l=-ld;
-						l.normalise();
-						double cosAlpha=n.dot(l);
-						if(cosAlpha>0){
-							redd+=i->diffuseLight.red*diffuseReflection.red*cosAlpha;
-							greend+=i->diffuseLight.green*diffuseReflection.green*cosAlpha;
-							blued+=i->diffuseLight.blue*diffuseReflection.blue*cosAlpha;
-						}
-					}
-				}
-			}
-
+		figColor::Color faceColor=imgUtils::CalculateFaceColor(lights,n,ambientReflection,diffuseReflection);
 		double dzdx=w1/((-d)*k);
 		double dzdy=w2/((-d)*k);
 
@@ -362,109 +499,109 @@ void imgUtils::draw_zbuf_triag(ZBuffer& buf, img::EasyImage& image,
 //			std::cout<<xl<<" "<<xr<<std::endl;
 
 			for(unsigned int pix=xl;pix<=xr;pix++){
-				double redp=redd;
-				double greenp=greend;
-				double bluep=blued;
 				double z=(1/zg)+(pix-xg)*dzdx+(i-yg)*dzdy;
 				Vector3D point=Vector3D::point(((pix-dx)*-(1/z))/d,((i-dy)*-(1/z))/d,1/z);
-				std::vector<double> eyeCoords=configuration["General"]["eye"].as_double_tuple_or_die();
-				Vector3D eyeVector=Vector3D::vector(eyeCoords[0],eyeCoords[1],eyeCoords[2]);
-				Matrix eyeMatrix=Engine3D::eyePointTrans(eyeVector);
-				eyeMatrix=eyeMatrix.inv(eyeMatrix);
 
-//				Vecotr3D eyepoint=Vecotr3D::point()
-				Vector3D shadowPoint=point*eyeMatrix;
-//				std::cout<<pix<<" "<<i<<" "<<buf.zBuffer.size()<<" "<<buf.zBuffer[pix].size()<<" "<<buf.zBuffer[pix][i]<<" "<<z<<std::endl;
+
+				std::vector<double> eyeCoords=configuration["General"]["eye"].as_double_tuple_or_die();
+//				Vector3D eyeVector=Vector3D::vector(eyeCoords[0],eyeCoords[1],eyeCoords[2]);
+//				Matrix eyeMatrix=Engine3D::eyePointTrans(eyeVector);
+//				eyeMatrix=eyeMatrix.inv(eyeMatrix);
+//
+////				Vecotr3D eyepoint=Vecotr3D::point()
+//				Vector3D shadowPoint=point*eyeMatrix;
+////				std::cout<<pix<<" "<<i<<" "<<buf.zBuffer.size()<<" "<<buf.zBuffer[pix].size()<<" "<<buf.zBuffer[pix][i]<<" "<<z<<std::endl;
 				if(buf.zBuffer.size()>pix&&buf.zBuffer[pix].size()>i&&buf.zBuffer[pix][i]>z){
 					buf.zBuffer[pix][i]=z;
-//					std::cout<<"ik geraak hier1"<<std::endl;
-					for(auto light:lights){
-//						std::cout<<"ik geraak hier3"<<std::endl;
-						if(!withShadow){
-							Vector3D ld=light->getSourceVector();
-
-							Vector3D l=(ld.is_point())?ld-point:-ld;
-							l.normalise();
-							double cosAlpha=n.dot(l);
-			//				std::cout<<cosAlpha<<std::endl;
-							if(cosAlpha>0&&ld.is_point()){
-								redp+=light->diffuseLight.red*diffuseReflection.red*cosAlpha;
-								greenp+=light->diffuseLight.green*diffuseReflection.green*cosAlpha;
-								bluep+=light->diffuseLight.blue*diffuseReflection.blue*cosAlpha;
-							}
-							Vector3D r=(2*cosAlpha*n)-l;
-							r.normalise();
-							Vector3D toEye=-point;
-							toEye.normalise();
-							double cosBeta=r.dot(toEye);
-							if(cosBeta>=0){
-								redp+= light->specularLight.red*specularReflection.red*pow(cosBeta,reflectionCoeff);
-								greenp+= light->specularLight.green*specularReflection.green*pow(cosBeta,reflectionCoeff);
-								bluep+= light->specularLight.blue*specularReflection.blue*pow(cosBeta,reflectionCoeff);
-							}
-						}else{
-//							std::cout<<"ik geraak hier4"<<std::endl;
-							Vector3D ld=light->getSourceVector();
-							bool isShadow=false;
-							if(ld.is_point()){
-//								std::cout<<"ik geraak hier5"<<std::endl;
-								Vector3D lightpoint=point*light->eye;
-								double xl=(light->d*lightpoint.x/(-lightpoint.z))+light->dx;
-								double yl=(light->d*lightpoint.y/(-lightpoint.z))+light->dy;
-//								std::cout<<"ik geraak hier6"<<std::endl;
-								if(xl>0&&yl>0){
-//									std::cout<<"ik geraak hier7"<<std::endl;
-//									std::cout<<xl<<" "<<yl<<std::endl;
-									double za=light->shadowmask.zBuffer[int(floor(xl))][int(floor(yl))];
-									double zb=light->shadowmask.zBuffer[int(ceil(xl))][int(floor(yl))];
-									double zc=light->shadowmask.zBuffer[int(floor(xl))][int(ceil(yl))];
-									double zd=light->shadowmask.zBuffer[int(ceil(xl))][int(ceil(yl))];
-									double ax=xl-int(floor(xl));
-									double ay=ay-int(floor(ay));
-									double ze=(1-ax)*za+ax*zb;
-									double zf=(1-ax)*zc+ax*zd;
-									double depth=(1-ay)*ze+ay*zf;
-									if(za==depth){
-										isShadow=true;
-									}
-								}
-
-							}
-							if(!isShadow){
-								Vector3D l=(ld.is_point())?ld-point:-ld;
-								l.normalise();
-								double cosAlpha=n.dot(l);
-				//				std::cout<<cosAlpha<<std::endl;
-								if(cosAlpha>0&&ld.is_point()){
-									redp+=light->diffuseLight.red*diffuseReflection.red*cosAlpha;
-									greenp+=light->diffuseLight.green*diffuseReflection.green*cosAlpha;
-									bluep+=light->diffuseLight.blue*diffuseReflection.blue*cosAlpha;
-								}
-								Vector3D r=(2*cosAlpha*n)-l;
-								r.normalise();
-								Vector3D toEye=-point;
-								toEye.normalise();
-								double cosBeta=r.dot(toEye);
-								if(cosBeta>=0){
-									redp+= light->specularLight.red*specularReflection.red*pow(cosBeta,reflectionCoeff);
-									greenp+= light->specularLight.green*specularReflection.green*pow(cosBeta,reflectionCoeff);
-									bluep+= light->specularLight.blue*specularReflection.blue*pow(cosBeta,reflectionCoeff);
-								}
-							}
-						}
-					}
-					if(redp>1){
-						redp=1;
-					}
-					if(greenp>1){
-						greenp=1;
-					}
-					if(bluep>1){
-						bluep=1;
-					}
-					int red=roundToInt(redp*255);
-					int green=roundToInt(greenp*255);
-					int blue=roundToInt(bluep*255);
+					figColor::Color pixelColor=imgUtils::CalculatePixelColor(lights,point,n,faceColor,diffuseReflection,specularReflection,reflectionCoeff,withShadow,eyeCoords);
+////					std::cout<<"ik geraak hier1"<<std::endl;
+//					for(auto light:lights){
+////						std::cout<<"ik geraak hier3"<<std::endl;
+//						if(!withShadow){
+//							Vector3D ld=light->getSourceVector();
+//
+//							Vector3D l=(ld.is_point())?ld-point:-ld;
+//							l.normalise();
+//							double cosAlpha=n.dot(l);
+//			//				std::cout<<cosAlpha<<std::endl;
+//							if(cosAlpha>0&&ld.is_point()){
+//								redp+=light->diffuseLight.red*diffuseReflection.red*cosAlpha;
+//								greenp+=light->diffuseLight.green*diffuseReflection.green*cosAlpha;
+//								bluep+=light->diffuseLight.blue*diffuseReflection.blue*cosAlpha;
+//							}
+//							Vector3D r=(2*cosAlpha*n)-l;
+//							r.normalise();
+//							Vector3D toEye=-point;
+//							toEye.normalise();
+//							double cosBeta=r.dot(toEye);
+//							if(cosBeta>=0){
+//								redp+= light->specularLight.red*specularReflection.red*pow(cosBeta,reflectionCoeff);
+//								greenp+= light->specularLight.green*specularReflection.green*pow(cosBeta,reflectionCoeff);
+//								bluep+= light->specularLight.blue*specularReflection.blue*pow(cosBeta,reflectionCoeff);
+//							}
+//						}else{
+////							std::cout<<"ik geraak hier4"<<std::endl;
+//							Vector3D ld=light->getSourceVector();
+//							bool isShadow=false;
+//							if(ld.is_point()){
+////								std::cout<<"ik geraak hier5"<<std::endl;
+//								Vector3D lightpoint=point*light->eye;
+//								double xl=(light->d*lightpoint.x/(-lightpoint.z))+light->dx;
+//								double yl=(light->d*lightpoint.y/(-lightpoint.z))+light->dy;
+////								std::cout<<"ik geraak hier6"<<std::endl;
+//								if(xl>0&&yl>0){
+////									std::cout<<"ik geraak hier7"<<std::endl;
+////									std::cout<<xl<<" "<<yl<<std::endl;
+//									double za=light->shadowmask.zBuffer[int(floor(xl))][int(floor(yl))];
+//									double zb=light->shadowmask.zBuffer[int(ceil(xl))][int(floor(yl))];
+//									double zc=light->shadowmask.zBuffer[int(floor(xl))][int(ceil(yl))];
+//									double zd=light->shadowmask.zBuffer[int(ceil(xl))][int(ceil(yl))];
+//									double ax=xl-int(floor(xl));
+//									double ay=ay-int(floor(ay));
+//									double ze=(1-ax)*za+ax*zb;
+//									double zf=(1-ax)*zc+ax*zd;
+//									double depth=(1-ay)*ze+ay*zf;
+//									if(za==depth){
+//										isShadow=true;
+//									}
+//								}
+//
+//							}
+//							if(!isShadow){
+//								Vector3D l=(ld.is_point())?ld-point:-ld;
+//								l.normalise();
+//								double cosAlpha=n.dot(l);
+//				//				std::cout<<cosAlpha<<std::endl;
+//								if(cosAlpha>0&&ld.is_point()){
+//									redp+=light->diffuseLight.red*diffuseReflection.red*cosAlpha;
+//									greenp+=light->diffuseLight.green*diffuseReflection.green*cosAlpha;
+//									bluep+=light->diffuseLight.blue*diffuseReflection.blue*cosAlpha;
+//								}
+//								Vector3D r=(2*cosAlpha*n)-l;
+//								r.normalise();
+//								Vector3D toEye=-point;
+//								toEye.normalise();
+//								double cosBeta=r.dot(toEye);
+//								if(cosBeta>=0){
+//									redp+= light->specularLight.red*specularReflection.red*pow(cosBeta,reflectionCoeff);
+//									greenp+= light->specularLight.green*specularReflection.green*pow(cosBeta,reflectionCoeff);
+//									bluep+= light->specularLight.blue*specularReflection.blue*pow(cosBeta,reflectionCoeff);
+//								}
+//							}
+//						}
+//					}
+//					if(redp>1){
+//						redp=1;
+//					}
+//					if(greenp>1){
+//						greenp=1;
+//					}
+//					if(bluep>1){
+//						bluep=1;
+//					}
+					int red=roundToInt(pixelColor.red*255);
+					int green=roundToInt(pixelColor.green*255);
+					int blue=roundToInt(pixelColor.blue*255);
 //					std::cout<<pix<<" "<<i<<std::endl;
 					image(pix, i) = Color(red,green,blue);
 				}

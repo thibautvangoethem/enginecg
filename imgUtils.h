@@ -58,6 +58,33 @@ public:
 	static EasyImage TrianglesToImg(const ini::Configuration &configuration,std::vector<figure3D>& figures,bool WithZBuf,std::vector<Light*>& Lights);
 
 	/**
+	 * \brief this fucntion calculates the color for an entire face
+	 * @param lights a vectpr of pointers to lights that are used to calculate the color
+	 * @param n the normalised w Vector3D
+	 * @param ambientreflection the ambient reflection
+	 * @param diffusereflection the diffuse reflection
+	 *
+	 */
+	static figColor::Color CalculateFaceColor(std::vector<Light*>& lights,Vector3D& n,figColor::Color& ambientReflection,figColor::Color& diffuseReflection);
+
+	/**
+	 * \brief this function calculates the light of a single pixel
+	 * @param lights a vector of pointers to lights
+	 * @param point the original point that represents the pixel
+	 * @param n teh normalised w vector
+	 * @param facecolor the color that is in effect to the full face the point belongs to
+	 * @param diffusereflection the diffuse reflection
+	 * @param speculardeflection the specular reflection
+	 * @param reflectionCoef the reflectioncoeficient
+	 * @param withShadow a bool that represents whether shadows should be taken into account
+	 */
+	static figColor::Color CalculatePixelColor(std::vector<Light*>& lights,Vector3D& point,
+			Vector3D& n,figColor::Color& faceColor,figColor::Color& diffuseReflection,figColor::Color& specularReflection,
+			double reflectionCoeff,bool withShadow,std::vector<double>eyeCoords);
+
+	static bool CheckShadow(Light* light,Vector3D& point);
+
+	/**
 	 * \brief this function draws a single zbuffered triangle
 	 * @param buf the zbuffer that will be used
 	 * @param image the image where the triangle will be drawn
@@ -72,6 +99,7 @@ public:
 	 * @param lights pointers to all the lights
 	 * @param configuration the original config
 	 * @param withShadow a bool that represents whether shadows should be taken into account
+	 * @param eyecoords the eycoords of the figure
 	 */
 	static void draw_zbuf_triag(ZBuffer& buf, img::EasyImage& image,
 			Vector3D const& A, Vector3D const& B, Vector3D const& C,

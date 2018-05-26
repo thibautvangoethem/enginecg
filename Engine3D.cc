@@ -308,6 +308,9 @@ figure3D Engine3D::DrawDodecahedron(const ini::Configuration &configuration,int 
 figure3D Engine3D::DrawSphere(const ini::Configuration &configuration,const int figcount,const int n){
 	std::string figure="Figure"+std::to_string(figcount);
 	figure3D oldfig=Engine3D::DrawIcosahedron(configuration,figcount);
+	for(Vector3D& point:oldfig.points){
+		point.normalise();
+	}
 	for(int i=0;i<n;i++){
 		figure3D newfig=createEmptyColorFigure(configuration,figure);
 		std::vector<Vector3D> nieuwpoints;
@@ -342,11 +345,11 @@ figure3D Engine3D::DrawSphere(const ini::Configuration &configuration,const int 
 		}
 		newfig.faces=nieuwface;
 		oldfig=newfig;
+		for(Vector3D& point:oldfig.points){
+			point.normalise();
+		}
 	}
-	for(Vector3D& point:oldfig.points){
-//		std::cout<<point.x<<std::endl;
-		point.normalise();
-	}
+
 	return oldfig;
 }
 

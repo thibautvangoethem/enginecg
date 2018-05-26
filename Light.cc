@@ -91,20 +91,21 @@ void Light::MakeShadowMask(std::vector<figure3D>& figures){
 	double yrange=std::abs(ymax-ymin);
 	double imagex=size*(xrange/std::max(xrange,yrange));
 	double imagey=size*(yrange/std::max(xrange,yrange));
-	shadowmask=ZBuffer(imagex,imagey);
+	std::cout<<imagex<<" "<<imagey<<std::endl;
+	this->shadowmask=ZBuffer(roundToInt(imagex),roundToInt(imagey));
 	d=0.95*(imagex/xrange);
 	double DCx=d*(xmin+xmax)/2.0;
 	double DCy=d*(ymin+ymax)/2.0;
 	dx=(imagex/2.0)-DCx;
 	dy=(imagey/2.0)-DCy;
 	for(figure3D driehoek:figures){
-//		std::cout<<driehoek.points.size()<<" "<<driehoek.faces.size()<<std::endl;
 		std::vector<Vector3D> points=driehoek.points;
 		for(face3D driehoekFace:driehoek.faces){
 			std::vector<int> index=driehoekFace.pointsIndex;
 			this->ShadowMaskTriangle(points[index[0]],points[index[1]],points[index[2]]);
 		}
 	}
+
 }
 
 void Light::ShadowMaskTriangle(Vector3D const& A, Vector3D const& B, Vector3D const& C){
@@ -151,20 +152,16 @@ void Light::ShadowMaskTriangle(Vector3D const& A, Vector3D const& B, Vector3D co
 						xlbc=xrbc;
 					}
 				}
-
 				double xl=round(std::min(xlab,std::min(xlac,xlbc)));
 				double xr=round(std::max(xrab,std::max(xrac,xrbc)));
-				xl=(xl>shadowmask.zBuffer.size())?shadowmask.zBuffer.size():xl;
+				xl=(xl>=shadowmask.zBuffer.size())?shadowmask.zBuffer.size()-1:xl;
 				xr=(xr<0)?0:xr;
-//				std::cout<<xl<<" "<<xr<<std::endl;
 				for(unsigned int pix=xl;pix<=xr;pix++){
 					double z=(1/zg)+(pix-xg)*dzdx+(i-yg)*dzdy;
-					if(shadowmask.zBuffer.size()>pix&&shadowmask.zBuffer[pix].size()>i&&shadowmask.zBuffer[pix][i]>z){
+					if(pix>0&&shadowmask.zBuffer.size()>pix&&i>0&&shadowmask.zBuffer[pix].size()>i&&shadowmask.zBuffer[pix][i]>z){
 						shadowmask.zBuffer[pix][i]=z;
-//						std::cout<<pix<<" "<<i<<std::endl;
 					}
 				}
 			}
 		}
-
 	}
