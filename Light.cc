@@ -91,7 +91,6 @@ void Light::MakeShadowMask(std::vector<figure3D>& figures){
 	double yrange=std::abs(ymax-ymin);
 	double imagex=size*(xrange/std::max(xrange,yrange));
 	double imagey=size*(yrange/std::max(xrange,yrange));
-	std::cout<<imagex<<" "<<imagey<<std::endl;
 	this->shadowmask=ZBuffer(roundToInt(imagex),roundToInt(imagey));
 	d=0.95*(imagex/xrange);
 	double DCx=d*(xmin+xmax)/2.0;

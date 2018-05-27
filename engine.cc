@@ -79,9 +79,13 @@ img::EasyImage generate_image(const ini::Configuration &configuration)
 				}
 				std::vector<Light*> lights=Engine3D::readLights(configuration);
 				EasyImage img= imgUtils::TrianglesToImg(configuration,figures,true,lights);
-//				for(unsigned int i=0;i<lights.size();i++){
-//					delete lights[i];
-//				}
+				bool shadow;
+				bool shadowexists=configuration["General"]["shadowEnabled"].as_bool_if_exists(shadow);
+				if(!shadowexists){
+					for(unsigned int i=0;i<lights.size();i++){
+						delete lights[i];
+					}
+				}
 				return img;
 
 			}

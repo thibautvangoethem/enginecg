@@ -18,4 +18,7 @@ $(EXECUTABLE): $(addsuffix .o,$(SOURCES))
 -include $(addsuffix .d,$(SOURCES))
 
 .PHONY: clean
-
+clean:
+	find . -name '*.o' -delete
+	find . -name '*.d' -delete
+	find . -name '*~'  -delete
